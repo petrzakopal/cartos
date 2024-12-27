@@ -1,4 +1,4 @@
-use std::ffi::CStr;
+use std::{ffi::CStr};
 
 use pcsc::*;
 use tracing::info;
@@ -71,7 +71,7 @@ fn print_reader_current_state(reader_states: &Vec<ReaderState>) {
 //
 //}
 
-pub fn initialize_readers() {
+pub fn initialize_readers() -> (Context, Vec<pcsc::ReaderState>) {
     // Create context
     let ctx =
         Context::establish(Scope::User).expect("Failed to estabilish context for the reader.");
@@ -93,4 +93,18 @@ pub fn initialize_readers() {
     ctx.get_status_change(None, &mut reader_states).expect("Failed to get the status change.");
     print_reader_current_state(&reader_states);
 
+
+    return (ctx, reader_states);
+}
+
+
+pub async fn read_loop() {
+
+    let (ctx, mut reader_states) : (Context, Vec<pcsc::ReaderState>) = initialize_readers();
+
+    loop {
+    print_reader_current_state(&reader_states);
+          ctx.get_status_change(None, &mut reader_states).expect("Failed to get the status change.");
+           print_reader_current_state(&reader_states);
+    }
 }
