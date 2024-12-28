@@ -4,7 +4,7 @@ use pcsc::*;
 use tracing::info;
 use tracing_log::log::debug;
 
-use crate::core::commands::{read_serial_number, read_serial_number_ntag215};
+use crate::core::commands::{read_serial_number};
 
 
 pub enum CardType {
@@ -192,8 +192,6 @@ pub async fn read_loop() {
                 {
                     if !card_processed {
                         info!("Card detected in the reader");
-                        //read_serial_number_mifare(&ctx, readers_buf);
-                        //read_serial_number_ntag215(&ctx, readers_buf);
                         read_serial_number(&ctx, readers_buf, CardType::Unknown);
                         card_processed = true;
                         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
