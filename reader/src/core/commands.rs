@@ -144,9 +144,6 @@ pub fn read_serial_number(ctx: &Context, mut readers_buf: [u8; 2048], card_type:
                     error!("Failed to end the transaction of the data.");
                 }
             }
-           // tx.end(Disposition::LeaveCard)
-           //     .map_err(|(_, err)| err)
-           //     .expect("failed to end transaction");
         }
         Err(err) => {
             error!("Failed to connect to card: {:?}", err);
