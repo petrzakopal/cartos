@@ -1,4 +1,5 @@
 use common::utils::handle_tokio_result::handle_task_result;
+use db::initialize_db::initialize_db;
 use reader::core::connect::{initialize_readers, read_loop};
 use tracing::{debug, info};
 use tracing_log::LogTracer;
@@ -20,6 +21,9 @@ async fn main() {
 
     debug!("Initialize the readers.");
 
+    debug!("Initialize the database.");
+
+    initialize_db().await;
 
     // Create broadcast channel for sending messages from read_loop to the database connection
 

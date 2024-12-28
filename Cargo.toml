@@ -2,6 +2,6 @@
 resolver = "2"
 
 members = [
-    "app", "common",
+    "app", "common", "db",
     "reader"
 ]
