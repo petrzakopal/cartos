@@ -1,17 +1,14 @@
 use std::ffi::CStr;
 
+use common::types::{
+    card::{CardDataSelect, CardType},
+    channels::CardData,
+};
 use pcsc::*;
 use tracing::info;
 use tracing_log::log::debug;
 
-use crate::core::commands::{read_serial_number};
-
-
-pub enum CardType {
-    Mifare,
-    Ntag215,
-    Unknown
-}
+use crate::core::commands::read_serial_number;
 
 /// Checks if the reader is dead
 fn is_dead(rs: &ReaderState) -> bool {
@@ -149,7 +146,6 @@ fn check_reader_current_and_event_state(
     return (current_state_bool, event_state_bool);
 }
 
-
 pub fn initialize_readers() -> (Context, Vec<pcsc::ReaderState>, [u8; 2048]) {
     // Create context
     let ctx =
@@ -176,7 +172,7 @@ pub fn initialize_readers() -> (Context, Vec<pcsc::ReaderState>, [u8; 2048]) {
     return (ctx, reader_states, readers_buf);
 }
 
-pub async fn read_loop() {
+pub async fn read_loop(serial_number_channel_sender: tokio::sync::broadcast::Sender<CardData>) {
     let (mut ctx, mut reader_states, mut readers_buf): (
         Context,
         Vec<pcsc::ReaderState>,
@@ -184,18 +180,38 @@ pub async fn read_loop() {
     ) = initialize_readers();
 
     let mut card_processed = false;
+    let mut card_data: CardData = CardData {
+        serial_number_string: String::default(),
+    };
+
+    let mut card_data_to_read: CardDataSelect = CardDataSelect::SerialNumber;
+
     loop {
         match ctx.get_status_change(Some(std::time::Duration::from_secs(5)), &mut reader_states) {
             Ok(_) => {
                 if !check_reader_current_state(&reader_states, State::PRESENT)
                     && check_reader_event_state(&reader_states, State::PRESENT)
                 {
+                    // Processing the inserted card for the first time
                     if !card_processed {
                         info!("Card detected in the reader");
-                        read_serial_number(&ctx, readers_buf, CardType::Unknown);
+
+                        // data reading selection and machine
+                        match card_data_to_read {
+                            CardDataSelect::SerialNumber => {
+                                read_serial_number(&ctx, readers_buf, CardType::Unknown);
+                                card_data.serial_number_string =
+                                    "Hello from the loop and reading the serial number."
+                                        .to_string();
+                                serial_number_channel_sender.send(card_data.clone());
+                            }
+                        };
+
+                        // Process the card only once
                         card_processed = true;
                         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
                     }
+                    // The card has been removed from the reader
                 } else if check_reader_event_state(&reader_states, State::EMPTY)
                     && !check_reader_current_state(&reader_states, State::EMPTY)
                 {

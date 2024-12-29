@@ -1,9 +1,10 @@
-use common::utils::handle_tokio_result::handle_task_result;
-use db::initialize_db::initialize_db;
+use common::{types::channels::{CardDataBroadcastChannel, CardData}, utils::handle_tokio_result::handle_task_result};
+use db::{connection::user_validation, initialize_db::initialize_db};
 use reader::core::connect::{initialize_readers, read_loop};
 use tracing::{debug, info};
 use tracing_log::LogTracer;
 use tracing_subscriber::EnvFilter;
+use tokio::sync::broadcast;
 
 #[tokio::main]
 async fn main() {
@@ -26,13 +27,19 @@ async fn main() {
     initialize_db().await;
 
     // Create broadcast channel for sending messages from read_loop to the database connection
+    let (card_data_channel_sender, card_data_channel_receiver) = tokio::sync::broadcast::channel::<CardData>(300);
+    let card_data_broadcast_channel : CardDataBroadcastChannel = CardDataBroadcastChannel {
+        tx: card_data_channel_sender,
+        rx: card_data_channel_receiver
+    };
+
 
     // Reading card for ID or data
-    let read_loop_handle = tokio::spawn(read_loop());
+    let read_loop_handle = tokio::spawn(read_loop(card_data_broadcast_channel.tx.clone()));
 
     // Reaching to database for validation of users
     // Also log entries to database
-    let database_connection_handle = tokio::spawn(async {});
+    let database_connection_handle = tokio::spawn(user_validation(card_data_broadcast_channel.tx));
 
 
     // Join threads

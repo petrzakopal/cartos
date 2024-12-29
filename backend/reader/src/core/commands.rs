@@ -1,10 +1,8 @@
-use common::utils::utf_32_to_8_conversion::Utf32To8;
+use common::{types::card::CardType, utils::utf_32_to_8_conversion::Utf32To8};
 use pcsc::*;
 use tokio::time::{sleep, Duration};
 use tracing::warn;
 use tracing_log::log::{debug, error, info};
-
-use super::connect::CardType;
 
 const MIFARE_SERIAL_NAME_BYTE_LENGHT: usize = 6;
 const NTAG215_SERIAL_NAME_BYTE_LENGHT: usize = 16; // Acutally 8 needed
