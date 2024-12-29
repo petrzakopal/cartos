@@ -1,5 +1,5 @@
 use common::{types::channels::{CardDataBroadcastChannel, CardData}, utils::handle_tokio_result::handle_task_result};
-use db::{connection::user_validation, initialize_db::initialize_db};
+use db::{connection::user_validation, initialize_db::{initialize_db, run_migrations_sqlite}};
 use reader::core::connect::{read_loop};
 use tracing::{debug, info};
 use tracing_log::LogTracer;
@@ -22,6 +22,7 @@ async fn main() {
     debug!("Initialize the database.");
 
     initialize_db().await;
+    run_migrations_sqlite().await;
 
     // Create broadcast channel for sending messages from read_loop to the database connection
     let (card_data_channel_sender, card_data_channel_receiver) = tokio::sync::broadcast::channel::<CardData>(300);
