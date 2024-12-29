@@ -18,4 +18,12 @@ impl<'a> Utf32To8<'a, u8> {
             .collect::<Vec<String>>()
             .join(" ")
     }
+
+    pub fn serial_number_format(&self) -> String {
+        self.to_hex_raw()
+            .iter()
+            .map(|&byte| format!("{:02X}", byte))
+            .collect::<Vec<String>>()
+            .join(":")
+    }
 }

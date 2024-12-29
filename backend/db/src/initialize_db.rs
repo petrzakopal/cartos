@@ -10,7 +10,7 @@ pub async fn create_table(pool: &SqlitePool) -> Result<(), Error> {
         r#"
         CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        cardId TEXT NOT NULL,
+        cardSerialNumber TEXT NOT NULL,
         email TEXT NOT NULL
         );
         "#

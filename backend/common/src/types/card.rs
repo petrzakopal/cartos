@@ -2,7 +2,7 @@
 pub enum CardType {
     Mifare,
     Ntag215,
-    Unknown
+    Unknown,
 }
 
 /// Card data or properties which can be read using the reader

@@ -173,6 +173,8 @@ pub fn initialize_readers() -> (Context, Vec<pcsc::ReaderState>, [u8; 2048]) {
 }
 
 pub async fn read_loop(serial_number_channel_sender: tokio::sync::broadcast::Sender<CardData>) {
+    // Initialize readers
+    debug!("Initialize the readers.");
     let (mut ctx, mut reader_states, mut readers_buf): (
         Context,
         Vec<pcsc::ReaderState>,
@@ -199,11 +201,9 @@ pub async fn read_loop(serial_number_channel_sender: tokio::sync::broadcast::Sen
                         // data reading selection and machine
                         match card_data_to_read {
                             CardDataSelect::SerialNumber => {
-                                read_serial_number(&ctx, readers_buf, CardType::Unknown);
-                                card_data.serial_number_string =
-                                    "Hello from the loop and reading the serial number."
-                                        .to_string();
-                                serial_number_channel_sender.send(card_data.clone());
+                               let serial_number_string = read_serial_number(&ctx, readers_buf, CardType::Unknown);
+                                card_data.serial_number_string = serial_number_string;
+                               let _ = serial_number_channel_sender.send(card_data.clone());
                             }
                         };
 

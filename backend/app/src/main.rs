@@ -1,10 +1,9 @@
 use common::{types::channels::{CardDataBroadcastChannel, CardData}, utils::handle_tokio_result::handle_task_result};
 use db::{connection::user_validation, initialize_db::initialize_db};
-use reader::core::connect::{initialize_readers, read_loop};
+use reader::core::connect::{read_loop};
 use tracing::{debug, info};
 use tracing_log::LogTracer;
 use tracing_subscriber::EnvFilter;
-use tokio::sync::broadcast;
 
 #[tokio::main]
 async fn main() {
@@ -19,8 +18,6 @@ async fn main() {
     }
 
     info!("Starting the application.");
-
-    debug!("Initialize the readers.");
 
     debug!("Initialize the database.");
 
