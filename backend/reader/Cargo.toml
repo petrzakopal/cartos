@@ -2,6 +2,8 @@
 name = "reader"
 version = "0.0.1"
 edition = "2021"
+authors = ["Petr Zakopal <info@petrzakopal.cz>"]
+homepage = "petrzakopal.com"
 
 [dependencies]
 pcsc = "2.8.2"
