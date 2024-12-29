@@ -8,7 +8,9 @@ use pcsc::*;
 use tracing::info;
 use tracing_log::log::debug;
 
-use crate::core::commands::read_serial_number;
+use crate::core::commands::read_serial_number_module::read_serial_number;
+
+
 
 /// Checks if the reader is dead
 fn is_dead(rs: &ReaderState) -> bool {
