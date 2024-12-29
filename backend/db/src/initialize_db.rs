@@ -29,7 +29,7 @@ pub async fn initialize_db() {
         }
     };
 
-    let mut pool_res = create_database_custom().await;
+    let mut pool_res = connect_db_sqlite().await;
 
 
     let pool = match pool_res {
@@ -47,7 +47,7 @@ pub async fn initialize_db() {
 
 }
 
-async fn create_database_custom() -> Result<SqlitePool, Error> {
+pub async fn connect_db_sqlite() -> Result<SqlitePool, Error> {
 
     let current_dir = match env::current_dir() {
         Ok(path) => path,
@@ -75,3 +75,4 @@ async fn create_database_custom() -> Result<SqlitePool, Error> {
     return Ok(pool);
 
 }
+

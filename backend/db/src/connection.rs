@@ -1,14 +1,90 @@
 use common::types::channels::CardData;
-use tracing::debug;
+use tracing::{debug, error, info, warn};
+// provides `try_next`
+use futures::TryStreamExt;
+// provides `try_get`
+use sqlx::Row;
 
-pub async fn user_validation(serial_number_channel_sender: tokio::sync::broadcast::Sender<CardData>){
+use crate::initialize_db::connect_db_sqlite;
 
-    let mut receiver = serial_number_channel_sender.subscribe();
+pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::Sender<CardData>) {
+    let mut receiver = card_data_channel_sender.subscribe();
 
+    while let Ok(card_data) = receiver.recv().await {
+        debug!(
+            "Received serial number string data {} proceeding to validate in the db.",
+            card_data.serial_number_string
+        );
 
-    while let Ok(mut serial_number_data) = receiver.recv().await {
+        let pool_res = connect_db_sqlite().await;
 
-        debug!("Received serial number string data {:#?} proceeding to validate in the db.", serial_number_data);
+        let pool = match pool_res {
+            Ok(pool) => pool,
+            Err(e) => {
+                error!("Error creating a pool {:#?}", e);
+                return;
+            }
+        };
 
+        // Expecting that when very simple db table with users and their respective cardSerialNumber
+        // is used, there is always only one entry with the serial_card_number which is being searched for
+        // so the loop can be broken if one entry is found.
+        let mut users_fetched = sqlx::query(r#"SELECT * FROM users WHERE cardSerialNumber = ?"#)
+            .bind(&card_data.serial_number_string)
+            .fetch(&pool);
+
+        let mut validated_user_email: String = String::default();
+        let mut is_user_validated: bool = false;
+
+        // Iterating through the results
+        loop {
+            match users_fetched.try_next().await {
+                Ok(Some(data)) => {
+                    // Just getting the email of the user which is trying to access the resource
+                    // (card scan)
+                    let email_from_db: &str = match data.try_get("email") {
+                        Ok(email) => email,
+                        Err(e) => {
+                            error!(
+                                "Cannot fetch the data for serial_number {}: {}",
+                                card_data.serial_number_string, e
+                            );
+                            return;
+                        }
+                    };
+
+                    // Use in the access logging to db function
+                    validated_user_email = email_from_db.to_string();
+                    is_user_validated = true;
+
+                    info!(
+                        "Fetched data from the db for serial_card_number {}: {}",
+                        &card_data.serial_number_string, email_from_db
+                    );
+                    break;
+                }
+                // No user with provided serial_card_number is found
+                Ok(None) => {
+                    warn!(
+                        "No user found with serial_card_number {}.",
+                        &card_data.serial_number_string
+                    );
+                    break; // Exit the loop when no more rows are available
+                }
+                Err(e) => {
+                    error!(
+                        "There has been an error fetching data for serial_card_number {}: {}",
+                        &card_data.serial_number_string, e
+                    );
+                    return;
+                }
+            }
+        }
+
+        if is_user_validated {
+            debug!("Will log the SUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
+        } else {
+            debug!("Will log the UNSUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
+        }
     }
 }
