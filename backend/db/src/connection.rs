@@ -83,8 +83,18 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
 
         if is_user_validated {
             debug!("Will log the SUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
+            let mut inserted_log_entry = sqlx::query(r#"INSERT INTO log (cardSerialNumber, result) VALUES (?, ?);"#)
+                .bind(&card_data.serial_number_string)
+                .bind("authenticated")
+                .execute(&pool).await;//.expect("could not insert log to the db");
+
         } else {
             debug!("Will log the UNSUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
+
+            let mut inserted_log_entry = sqlx::query(r#"INSERT INTO log (cardSerialNumber, result) VALUES (?, ?);"#)
+                .bind(&card_data.serial_number_string)
+                .bind("not_authenticated")
+                .execute(&pool).await;//.expect("could not insert log to the db");
         }
     }
 }
