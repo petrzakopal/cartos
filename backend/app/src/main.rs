@@ -1,6 +1,7 @@
-use common::{types::channels::{CardDataBroadcastChannel, CardData}, utils::handle_tokio_result::handle_task_result};
-use db::{connection::user_validation, initialize_db::{initialize_db, run_migrations_sqlite}};
-use reader::core::connect::{read_loop};
+use common::{types::channels::{CardData, CardDataBroadcastChannel}, utils::{handle_tokio_result::handle_task_result, load_env::load_env}};
+use db::{connection::{get_sqlite_db_pool, user_validation}, initialize_db::{initialize_db, run_migrations_sqlite}};
+use reader::core::connect::read_loop;
+use server::rest::start_http_server;
 use tracing::{debug, info};
 use tracing_log::LogTracer;
 use tracing_subscriber::EnvFilter;
@@ -21,6 +22,9 @@ async fn main() {
 
     debug!("Initialize the database.");
 
+
+    load_env();
+
     initialize_db().await;
     run_migrations_sqlite().await;
 
@@ -40,12 +44,16 @@ async fn main() {
     let database_connection_handle = tokio::spawn(user_validation(card_data_broadcast_channel.tx));
 
 
+    let http_server_handle = tokio::spawn(start_http_server(get_sqlite_db_pool().await));
+
+
     // Join threads
-    let (read_loop_tokjoin, database_connection_tokjion) = tokio::join!(read_loop_handle, database_connection_handle);
+    let (read_loop_tokjoin, database_connection_tokjoin, http_server_tokjoin) = tokio::join!(read_loop_handle, database_connection_handle, http_server_handle);
 
     // Handle the results gracefully
     handle_task_result(read_loop_tokjoin, "read_loop");
-    handle_task_result(database_connection_tokjion, "read_loop");
+    handle_task_result(database_connection_tokjoin, "read_loop");
+    handle_task_result(http_server_tokjoin, "http_server");
 
 
 }

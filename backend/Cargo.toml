@@ -4,4 +4,4 @@ resolver = "2"
 members = [
     "app", "common", "db",
     "reader"
-]
+, "server"]
