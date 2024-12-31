@@ -26,7 +26,6 @@ pub async fn start_http_server(db_client: Pool<Sqlite>) {
 
     let connection_settings = ConnectionSettings {
         host_ip_address: [0, 0, 0, 0],
-        //http: port_http.parse().expect("PORT_HTTP must be valid u16"),
         http: port_http,
     };
 

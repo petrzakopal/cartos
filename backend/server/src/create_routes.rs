@@ -23,8 +23,13 @@ pub fn create_routes(db_sqlite_pool: Pool<Sqlite>) -> Router {
     });
 
     let app: Router = Router::new()
-        // Declaration form
-        .route("/log/get", post(get_all_logs))
+        .route("/user/add", post({}))
+        .route("/user/view/all", post({}))
+        .route("/user/view/single/email", post({}))
+        .route("/user/view/single/card_serial_number", post({}))
+        .route("/log/get/all", post(get_all_logs))
+        .route("/log/get/single/email", post({}))
+        .route("/log/get/single/card_serial_number", post({}))
         .route("/ws", get(ws_handler))
         // maybe add .with_state and AppState and channels for web sockets
         .layer(
