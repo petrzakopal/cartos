@@ -9,7 +9,7 @@ use axum::{
 use futures::TryStreamExt;
 use serde_json::Value;
 use sqlx::Row;
-use tracing::{debug, error, warn};
+use tracing::{debug, error, info, warn};
 
 use crate::create_routes::AppState;
 
@@ -28,7 +28,7 @@ pub async fn get_all_logs(
     let mut query_result = sqlx::query(r#"SELECT * from log;"#).fetch(&app_state.db_sqlite_pool);
 
     while let Ok(Some(res)) = query_result.try_next().await {
-        let email: Option<String> = match res.try_get("cardSerialNumber") {
+        let serial_card_number: Option<String> = match res.try_get("cardSerialNumber") {
             Ok(Some(data)) => {
                 debug!("Obtained cardSerialNumber from logs {}", data);
                 Some(data)
@@ -43,6 +43,7 @@ pub async fn get_all_logs(
             }
         };
     }
+
 
     let response_builder = Response::builder()
         .status(200)
