@@ -14,7 +14,9 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-
+    "paths": {
+      "@/*": ["./*"]
+      },
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -22,5 +24,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["src","**/*.ts", "**/*.tsx"]
 }
