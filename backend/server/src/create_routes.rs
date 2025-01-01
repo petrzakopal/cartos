@@ -6,7 +6,7 @@ use axum::{routing::{any, get, post}, Router};
 
 use sqlx::{Pool, Sqlite};
 
-use crate::{routes::log::get_all::get_all_logs, websocket::ws_handler, websocket_clients::Clients};
+use crate::{routes::log::{view_all::view_all_logs, view_single_email::view_single_log_by_email}, websocket::ws_handler, websocket_clients::Clients};
 
 // Shared state in the AXUM routes
 #[derive(Clone)]
@@ -27,9 +27,9 @@ pub fn create_routes(db_sqlite_pool: Pool<Sqlite>) -> Router {
         .route("/user/view/all", post({}))
         .route("/user/view/single/email", post({}))
         .route("/user/view/single/card_serial_number", post({}))
-        .route("/log/get/all", post(get_all_logs))
-        .route("/log/get/single/email", post({}))
-        .route("/log/get/single/card_serial_number", post({}))
+        .route("/log/view/all", post(view_all_logs))
+        .route("/log/view/single/email", post(view_single_log_by_email))
+        .route("/log/view/single/card_serial_number", post({}))
         .route("/ws", get(ws_handler))
         // maybe add .with_state and AppState and channels for web sockets
         .layer(

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
-cardSerialNumber TEXT NOT NULL,
+card_serial_number TEXT NOT NULL,
 email TEXT NOT NULL,
 note TEXT
 );
@@ -8,7 +8,8 @@ note TEXT
 CREATE TABLE IF NOT EXISTS log (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-cardSerialNumber TEXT NOT NULL,
+card_serial_number TEXT NOT NULL,
+email TEXT NOT NULL,
 result TEXT,
 note TEXT
 );

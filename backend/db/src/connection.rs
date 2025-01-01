@@ -40,7 +40,7 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
         // Expecting that when very simple db table with users and their respective cardSerialNumber
         // is used, there is always only one entry with the serial_card_number which is being searched for
         // so the loop can be broken if one entry is found.
-        let mut users_fetched = sqlx::query(r#"SELECT * FROM users WHERE cardSerialNumber = ?"#)
+        let mut users_fetched = sqlx::query(r#"SELECT * FROM users WHERE card_serial_number = ?"#)
             .bind(&card_data.serial_number_string)
             .fetch(&pool);
 
@@ -94,21 +94,26 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
 
         if is_user_validated {
             debug!("Will log the SUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
-            let mut inserted_log_entry =
-                sqlx::query(r#"INSERT INTO log (cardSerialNumber, result) VALUES (?, ?);"#)
-                    .bind(&card_data.serial_number_string)
-                    .bind("authenticated")
-                    .execute(&pool)
-                    .await; //.expect("could not insert log to the db");
+
+            let mut inserted_log_entry = sqlx::query(
+                r#"INSERT INTO log (card_serial_number, email, result) VALUES (?, ?, ?);"#,
+            )
+            .bind(&card_data.serial_number_string)
+            .bind(validated_user_email)
+            .bind("authenticated")
+            .execute(&pool)
+            .await; //.expect("could not insert log to the db");
         } else {
             debug!("Will log the UNSUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
 
-            let mut inserted_log_entry =
-                sqlx::query(r#"INSERT INTO log (cardSerialNumber, result) VALUES (?, ?);"#)
-                    .bind(&card_data.serial_number_string)
-                    .bind("not_authenticated")
-                    .execute(&pool)
-                    .await; //.expect("could not insert log to the db");
+            let mut inserted_log_entry = sqlx::query(
+                r#"INSERT INTO log (card_serial_number, email, result) VALUES (?, ?, ?);"#,
+            )
+            .bind(&card_data.serial_number_string)
+            .bind(validated_user_email)
+            .bind("not_authenticated")
+            .execute(&pool)
+            .await; //.expect("could not insert log to the db");
         }
     }
 }

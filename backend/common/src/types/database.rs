@@ -5,7 +5,7 @@ pub struct LogEntry {
     id: i32,
     timestamp: String,
     //#[serde(rename = "cardSerialNumber")]
-    #[sqlx(rename = "cardSerialNumber")]
+    //#[sqlx(rename = "cardSerialNumber")]
     card_serial_number: String,
     result: String,
     note: Option<String>,
