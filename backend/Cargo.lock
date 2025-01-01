@@ -318,9 +318,11 @@ dependencies = [
 name = "common"
 version = "0.0.1"
 dependencies = [
+ "axum",
  "chrono",
  "dotenv",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
  "tracing",

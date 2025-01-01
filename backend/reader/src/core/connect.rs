@@ -184,9 +184,10 @@ pub async fn read_loop(serial_number_channel_sender: tokio::sync::broadcast::Sen
     ) = initialize_readers();
 
     let mut card_processed = false;
-    let mut card_data: CardData = CardData {
-        serial_number_string: String::default(),
-    };
+    let mut card_data : CardData = CardData::new();
+    //let mut card_data: CardData = CardData {
+    //    serial_number_string: String::default(),
+    //};
 
     let mut card_data_to_read: CardDataSelect = CardDataSelect::SerialNumber;
 
