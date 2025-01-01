@@ -1,0 +1,24 @@
+meta {
+  name: view_single_log_by_card_serial_number
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:4000/log/view/single/card_serial_number
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "zakoppe1@fel.cvut.cz",
+    "card_data": {
+      "serial_number" : "04:4C:21:6A:2C:59:81"
+    }
+  }
+}

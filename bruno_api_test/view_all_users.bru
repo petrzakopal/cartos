@@ -1,0 +1,19 @@
+meta {
+  name: view_all_users
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:4000/user/view/all
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}

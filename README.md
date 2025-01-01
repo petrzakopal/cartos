@@ -25,3 +25,8 @@ and run with the same argument.
 ```sh
 ./websocat.x86_64-unknown-linux-musl "ws://0.0.0.0:4000/ws"
 ```
+
+# API Requests for Bruno
+
+For testing the api the [Bruno](https://github.com/usebruno/bruno) open source tool for testing
+the endpoints was used. The files of bruno requests can be found in the folder [bruno_api_test](./bruno_api_test).

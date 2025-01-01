@@ -1,0 +1,24 @@
+meta {
+  name: add_single_use
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:4000/user/add
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "test@fel.cvut.cz",
+    "card_data": {
+      "serial_number" : "AA:BB:CC:11"
+    }
+  }
+}
