@@ -1,1 +1,1 @@
-ALTER TABLE users ADD COLUMN test_column TEXT;
+ALTER TABLE user ADD COLUMN test_column TEXT;

@@ -6,7 +6,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use common::types::database::LogEntry;
+use common::types::database::UserEntry;
 use futures::TryStreamExt;
 use serde_json::{json, Value};
 use sqlx::Row;
@@ -14,7 +14,7 @@ use tracing::{debug, error, info, warn};
 
 use crate::create_routes::AppState;
 
-pub async fn view_single_log_by_card_serial_number(
+pub async fn view_single_user_by_email(
     headers: HeaderMap,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<Value>,
@@ -39,12 +39,12 @@ pub async fn view_single_log_by_card_serial_number(
     }
 
     // Obtain the email to query from the body to database
-    let field_to_query = body.get("card_data").and_then(|card_data| card_data.get("serial_number")).and_then(|v| v.as_str()).unwrap_or("");
+    let email_to_query = body.get("email").and_then(|v| v.as_str()).unwrap_or("");
 
     // If no email to search for has been specified
-    if field_to_query == "" {
+    if email_to_query == "" {
         let res: Value = serde_json::from_str(
-            r#"{"message":"No field in the request body was specified.", "status":"error"}"#,
+            r#"{"message":"No email field in the request body was specified.", "status":"error"}"#,
         )
         .unwrap();
         let response_builder = Response::builder()
@@ -56,11 +56,11 @@ pub async fn view_single_log_by_card_serial_number(
 
     }
 
-    debug!("email to search for in the db: {}", field_to_query);
+    debug!("email to search for in the db: {}", email_to_query);
 
     // Getting the data and mapping the results on a structn with correct naming
-    let mut query_mapped: Vec<LogEntry> = sqlx::query_as(r#"SELECT * from log WHERE card_serial_number = ?;"#)
-        .bind(field_to_query)
+    let mut query_mapped: Vec<UserEntry> = sqlx::query_as(r#"SELECT * from user WHERE email = ?;"#)
+        .bind(email_to_query)
         .fetch_all(&app_state.db_sqlite_pool)
         .await
         .unwrap();
@@ -73,7 +73,7 @@ pub async fn view_single_log_by_card_serial_number(
     // If email has been specified but the results were not found
     if query_mapped.len() == 0 {
         let res: Value = json!({
-        "message": format!("No entries with provided field_to_query: {} were found.", field_to_query),
+        "message": format!("No entries with provided email: {} were found.", email_to_query),
         "status": "result_not_found"
     });
 

@@ -40,7 +40,7 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
         // Expecting that when very simple db table with users and their respective cardSerialNumber
         // is used, there is always only one entry with the serial_card_number which is being searched for
         // so the loop can be broken if one entry is found.
-        let mut users_fetched = sqlx::query(r#"SELECT * FROM users WHERE card_serial_number = ?"#)
+        let mut users_fetched = sqlx::query(r#"SELECT * FROM user WHERE card_serial_number = ?"#)
             .bind(&card_data.serial_number_string)
             .fetch(&pool);
 

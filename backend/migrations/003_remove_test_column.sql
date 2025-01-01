@@ -1,14 +1,14 @@
-CREATE TABLE users_new (
+CREATE TABLE user_new (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     card_serial_number TEXT NOT NULL,
     email TEXT NOT NULL,
     note TEXT
 );
 
-INSERT INTO users_new (id, card_serial_number, email, note)
-SELECT id, card_serial_number, email, note FROM users;
+INSERT INTO user_new (id, card_serial_number, email, note)
+SELECT id, card_serial_number, email, note FROM user;
 
-DROP TABLE users;
+DROP TABLE user;
 
-ALTER TABLE users_new RENAME TO users;
+ALTER TABLE user_new RENAME TO user;
 

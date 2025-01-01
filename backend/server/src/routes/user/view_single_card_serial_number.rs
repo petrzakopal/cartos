@@ -6,7 +6,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use common::types::database::LogEntry;
+use common::types::database::UserEntry;
 use futures::TryStreamExt;
 use serde_json::{json, Value};
 use sqlx::Row;
@@ -14,7 +14,7 @@ use tracing::{debug, error, info, warn};
 
 use crate::create_routes::AppState;
 
-pub async fn view_single_log_by_card_serial_number(
+pub async fn view_single_user_by_card_serial_number(
     headers: HeaderMap,
     State(app_state): State<Arc<AppState>>,
     Json(body): Json<Value>,
@@ -59,7 +59,7 @@ pub async fn view_single_log_by_card_serial_number(
     debug!("email to search for in the db: {}", field_to_query);
 
     // Getting the data and mapping the results on a structn with correct naming
-    let mut query_mapped: Vec<LogEntry> = sqlx::query_as(r#"SELECT * from log WHERE card_serial_number = ?;"#)
+    let mut query_mapped: Vec<UserEntry> = sqlx::query_as(r#"SELECT * from user WHERE card_serial_number = ?;"#)
         .bind(field_to_query)
         .fetch_all(&app_state.db_sqlite_pool)
         .await

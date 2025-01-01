@@ -6,7 +6,7 @@ use axum::{routing::{any, get, post}, Router};
 
 use sqlx::{Pool, Sqlite};
 
-use crate::{routes::log::{view_all::view_all_logs, view_single_email::view_single_log_by_email}, websocket::ws_handler, websocket_clients::Clients};
+use crate::{routes::{log::{view_all::view_all_logs, view_single_card_serial_number::view_single_log_by_card_serial_number, view_single_email::view_single_log_by_email}, user::{view_all::view_all_users, view_single_card_serial_number::view_single_user_by_card_serial_number, view_single_email::view_single_user_by_email}}, websocket::ws_handler, websocket_clients::Clients};
 
 // Shared state in the AXUM routes
 #[derive(Clone)]
@@ -24,12 +24,12 @@ pub fn create_routes(db_sqlite_pool: Pool<Sqlite>) -> Router {
 
     let app: Router = Router::new()
         .route("/user/add", post({}))
-        .route("/user/view/all", post({}))
-        .route("/user/view/single/email", post({}))
-        .route("/user/view/single/card_serial_number", post({}))
+        .route("/user/view/all", post(view_all_users))
+        .route("/user/view/single/email", post(view_single_user_by_email))
+        .route("/user/view/single/card_serial_number", post(view_single_user_by_card_serial_number))
         .route("/log/view/all", post(view_all_logs))
         .route("/log/view/single/email", post(view_single_log_by_email))
-        .route("/log/view/single/card_serial_number", post({}))
+        .route("/log/view/single/card_serial_number", post(view_single_log_by_card_serial_number))
         .route("/ws", get(ws_handler))
         // maybe add .with_state and AppState and channels for web sockets
         .layer(
