@@ -1,14 +1,17 @@
 import { NavLink } from "react-router";
 
+
 export async function clientLoader() {
     // you can now fetch data here
     return {
         title: "About page",
     };
 }
-export async function loader({ params }: Route.LoaderArgs) {
-    console.log("server side variable BACKEND_URL:",process.env.BACKEND_URL)
-}
+
+// Define loader function only if SSR is disabled
+//export async function loader({ params }: Route.LoaderArgs) {
+//        console.log("server side variable BACKEND_URL:", process.env.BACKEND_URL);
+//}
 
 export default function Component({ loaderData }) {
     return (
