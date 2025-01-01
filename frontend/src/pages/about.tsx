@@ -6,6 +6,9 @@ export async function clientLoader() {
         title: "About page",
     };
 }
+export async function loader({ params }: Route.LoaderArgs) {
+    console.log("server side variable BACKEND_URL:",process.env.BACKEND_URL)
+}
 
 export default function Component({ loaderData }) {
     return (
@@ -14,6 +17,9 @@ export default function Component({ loaderData }) {
                 <h1>{loaderData.title}</h1>
                 <span>test text about</span>
                 <NavLink to={"/"} >To Home</NavLink>
+                <pre className="whitespace-pre-wrap">
+                    testing env variable: {import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}
+                </pre>
             </div>
         </>
     );

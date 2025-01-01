@@ -26,3 +26,7 @@ build
 
 # react-router
 .react-router/
+
+# env
+*.env
+!.env.example
