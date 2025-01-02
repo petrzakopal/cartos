@@ -1,0 +1,19 @@
+meta {
+  name: restart_service
+  type: http
+  seq: 8
+}
+
+post {
+  url: http://localhost:4000/system/restart
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {}
+}

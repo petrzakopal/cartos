@@ -1,4 +1,4 @@
-use common::{hw::gpio::gpio_set_1_then_0, types::channels::CardData};
+use common::{hw::gpio::gpio_indicate_user_authorized, types::channels::CardData};
 use tracing::{debug, error, info, warn};
 // provides `try_next`
 use futures::TryStreamExt;
@@ -104,7 +104,7 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
             .execute(&pool)
             .await; //.expect("could not insert log to the db");
 
-            let gpio_res = gpio_set_1_then_0();
+            let gpio_res = gpio_indicate_user_authorized();
 
             match gpio_res {
                 Ok(v) => {

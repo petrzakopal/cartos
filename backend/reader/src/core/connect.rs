@@ -1,16 +1,17 @@
 use std::ffi::CStr;
 
-use common::types::{
-    card::{CardDataSelect, CardType},
-    channels::CardData,
+use common::{
+    hw::gpio::gpio_indicate_no_readers_found,
+    types::{
+        card::{CardDataSelect, CardType},
+        channels::CardData,
+    },
 };
 use pcsc::*;
-use tracing::info;
+use tracing::{error, info, warn};
 use tracing_log::log::debug;
 
 use crate::core::commands::read_serial_number_module::read_serial_number;
-
-
 
 /// Checks if the reader is dead
 fn is_dead(rs: &ReaderState) -> bool {
@@ -50,6 +51,28 @@ fn add_new_reader<'a>(
         .collect::<Vec<_>>();
 
     info!("Obtained readers {:?}", readers);
+
+    if readers.len() == 0 {
+        warn!("No readers found, proceed to indicating.");
+
+        // indicate using gpio LED
+
+        // think if not spawn tokio process and loop there
+        // also need to indicate the same problem when the reader disconnects
+        let gpio_res = gpio_indicate_no_readers_found();
+
+        match gpio_res {
+            Ok(v) => {
+                debug!("Successfully performed the gpio operation.");
+                loop {
+                    let _ = gpio_indicate_no_readers_found();
+                }
+            }
+            Err(e) => {
+                error!("Did not perform the gpio operation successfully. {:#?}", e);
+            }
+        };
+    }
     //info!("Obtained reader names {:?}", reader_names);
 
     for name in readers.clone() {
@@ -184,7 +207,7 @@ pub async fn read_loop(serial_number_channel_sender: tokio::sync::broadcast::Sen
     ) = initialize_readers();
 
     let mut card_processed = false;
-    let mut card_data : CardData = CardData::new();
+    let mut card_data: CardData = CardData::new();
     //let mut card_data: CardData = CardData {
     //    serial_number_string: String::default(),
     //};
@@ -204,9 +227,10 @@ pub async fn read_loop(serial_number_channel_sender: tokio::sync::broadcast::Sen
                         // data reading selection and machine
                         match card_data_to_read {
                             CardDataSelect::SerialNumber => {
-                               let serial_number_string = read_serial_number(&ctx, readers_buf, CardType::Unknown);
+                                let serial_number_string =
+                                    read_serial_number(&ctx, readers_buf, CardType::Unknown);
                                 card_data.serial_number_string = serial_number_string;
-                               let _ = serial_number_channel_sender.send(card_data.clone());
+                                let _ = serial_number_channel_sender.send(card_data.clone());
                             }
                         };
 
@@ -228,7 +252,11 @@ pub async fn read_loop(serial_number_channel_sender: tokio::sync::broadcast::Sen
                     // Normal timeout, add a small delay
                     tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
                 } else {
+
+                    let _ = gpio_indicate_no_readers_found();
+
                     info!("Error getting status change: {}", e);
+
                     // Add longer delay on error
                     tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 }

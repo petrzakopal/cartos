@@ -132,6 +132,10 @@ sudo systemctl status cartos.service
 
 # When running on the Orange Pi 3 W
 
+> [!WARNING]  
+> The USB ACS Reader must be reconnected after the system reboots and the service/app 
+> running cartos must be also restarted.
+
 After the board reboots, there is a need to unplug and plug the USB of the NFC reader, then run
 
 ```sh
@@ -144,3 +148,19 @@ so the USB reader can be read by the backend application.
 > [!NOTE]  
 > This approach is not suitable but could not find how to make it automatically.
 
+# Services
+
+The service for backend can be installed with the usage of files in [service](.service).
+
+## `install_requirements.sh`
+
+Installs the requirements for the pcsc and other required configs.
+
+
+## `install.sh`
+
+Installs the service to the daemon.
+
+## `logs.sh`
+
+Opens logs of the `cartos.service`.
