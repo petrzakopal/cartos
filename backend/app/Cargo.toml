@@ -20,3 +20,4 @@ reader = { path= "../reader"}
 common = { path= "../common"}
 db = { path= "../db"}
 server = { path= "../server"}
+sudo = "0.6.0"

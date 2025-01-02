@@ -1,0 +1,37 @@
+# Use a Rust base image
+FROM rust:latest AS build
+
+# Install necessary cross-compilation tools and libraries
+RUN dpkg --add-architecture arm64 && \
+    apt-get update && \
+    apt-get install -y \
+        gcc-aarch64-linux-gnu \
+        libc6-dev:arm64 \
+        libpcsclite-dev:arm64 \
+        libpcsclite1:arm64 \
+        pkg-config \
+        build-essential \
+        openssl:arm64 \
+        libssl-dev:arm64 \
+        pcscd \
+        --no-install-recommends && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set up the Rust target for aarch64
+RUN rustup target add aarch64-unknown-linux-gnu
+
+# Set environment variables for cross-compilation
+ENV CARGO_BUILD_TARGET=aarch64-unknown-linux-gnu
+ENV PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+ENV PKG_CONFIG_ALLOW_CROSS=1
+ENV LIBPCSCLITE_LIB_DIR=/usr/lib/aarch64-linux-gnu
+ENV LIBPCSCLITE_INCLUDE_DIR=/usr/include/PCSC
+ENV OPENSSL_DIR=/usr/
+ENV OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu/
+ENV OPENSSL_INCLUDE_DIR=/usr/include
+
+# Set the working directory
+WORKDIR /project
+
+# Default command to build the project
+CMD ["bash", "-c", "cd /project && make arm64"]

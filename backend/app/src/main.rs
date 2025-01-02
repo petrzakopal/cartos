@@ -8,6 +8,7 @@ use tracing_subscriber::EnvFilter;
 
 #[tokio::main]
 async fn main() {
+    sudo::escalate_if_needed().expect("Could not run as a sudo.");
     LogTracer::init().expect("Failed to set the log tracer.");
 
     let log_subscriber = tracing_subscriber::fmt()

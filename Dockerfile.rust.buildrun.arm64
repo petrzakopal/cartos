@@ -1,0 +1,61 @@
+# Build stage for ARM64 cross-compilation
+FROM rust:latest AS build
+
+# Install cross-compilation dependencies
+RUN dpkg --add-architecture arm64 && \
+    apt-get update && \
+    apt-get install -y \
+        gcc-aarch64-linux-gnu \
+        libc6-dev:arm64 \
+        libpcsclite-dev:arm64 \
+        libpcsclite1:arm64 \
+        pkg-config \
+        build-essential \
+        openssl:arm64 \
+        libssl-dev:arm64 \
+        pcscd \
+        --no-install-recommends && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set environment variables for cross-compilation
+ENV CARGO_BUILD_TARGET=aarch64-unknown-linux-gnu
+ENV PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+ENV PKG_CONFIG_ALLOW_CROSS=1
+ENV LIBPCSCLITE_LIB_DIR=/usr/lib/aarch64-linux-gnu
+ENV LIBPCSCLITE_INCLUDE_DIR=/usr/include/PCSC
+ENV OPENSSL_DIR=/usr/
+ENV OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu/
+ENV OPENSSL_INCLUDE_DIR=/usr/include
+
+# Add project files and build for ARM64
+WORKDIR /usr/src/backend
+COPY . /usr/src/backend
+RUN rustup target add aarch64-unknown-linux-gnu
+RUN make arm64
+
+# Runtime stage for ARM64 (use ARM64 base image)
+FROM debian:stable-slim AS runner
+# Install OpenSSL libraries
+RUN dpkg --add-architecture arm64
+RUN apt-get update && \
+    apt-get install -y openssl libssl3 \
+    libpcsclite1:arm64 \
+    pkg-config \
+    && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV LIBPCSCLITE_LIB_DIR=/usr/lib/aarch64-linux-gnu
+ENV LIBPCSCLITE_INCLUDE_DIR=/usr/include/PCSC
+ENV OPENSSL_DIR=/usr/
+ENV OPENSSL_LIB_DIR=/usr/lib/aarch64-linux-gnu/
+ENV OPENSSL_INCLUDE_DIR=/usr/include
+
+# Copy ARM64 binaries and migrations
+COPY --from=build /usr/src/backend/target/aarch64-unknown-linux-gnu/release/app /usr/local/bin/app
+COPY --from=build /usr/src/backend/migrations /usr/local/bin/migrations
+
+# Expose application port
+EXPOSE 4000
+
+# Default command to run the application
+CMD ["/usr/local/bin/app"]

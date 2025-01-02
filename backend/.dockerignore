@@ -1,0 +1,6 @@
+
+.env
+.gitignore
+cartos.db
+target/
+.git

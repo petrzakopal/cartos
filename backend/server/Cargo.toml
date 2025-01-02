@@ -10,7 +10,7 @@ tokio = { version = "1", features = ["full"] }
 tracing = "0.1.40"
 common = { path= "../common"}
 axum = {version = "0.7.7", features= ["ws"]}
-axum-server = "0.7.1"
+axum-server = { version = "0.7.1", features = ["rustls", "openssl", "tls-rustls"] }
 serde = "1.0.210"
 serde_json = "1.0.128"
 tower = "0.5.1"
