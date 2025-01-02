@@ -31,7 +31,7 @@ pub async fn do_restart_service(
         .body(Json(res).into_response().into_body())
         .unwrap();
 
-    let service_name = "cartos.service"; // Replace with your actual service name
+    let service_name = "cartos-backend.service"; // Replace with your actual service name
     let status: ExitStatus = Command::new("systemctl")
         .arg("restart")
         .arg(service_name)

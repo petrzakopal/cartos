@@ -1,1 +1,1 @@
-sudo journalctl -u cartos.service -f --output=cat
+sudo journalctl -u cartos-backend.service -f --output=cat

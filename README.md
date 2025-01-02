@@ -19,7 +19,7 @@ Also, the code is not finished at all. Currently rewriting the one file code fro
 ## Backend
 > [!TIP]
 > It is very appropriate to copy the build `app` from `backend/target/aarch64-unknown-linux-gnu/release/app`
-> to `/app` directory of the system together with `migrations` and `service` folder.
+> to `/cartos/backend` directory of the system together with `migrations` and `service` folder.
 > Then when running the service for the first time, install requirements using `install_requirements.sh`
 > and the service using `install.sh`. The logs can be displayed using `logs.sh`
 
@@ -128,25 +128,23 @@ sudo docker run --device=/dev/gpiochip0 -v /var/run/pcscd/pcscd.comm:/var/run/pc
 # Run the backend as a service in Linux
 
 ```sh
-sudo vi /etc/systemd/system/cartos.service
+sudo vi /etc/systemd/system/cartos-backend.service
 ```
-
-Insert contents from [service/cartos.service](service/cartos.service).
 
 ```sh
 sudo systemctl daemon-reload
 ```
 
 ```sh
-sudo systemctl enable cartos.service
+sudo systemctl enable cartos-backend.service
 ```
 
 ```sh
-sudo systemctl start cartos.service
+sudo systemctl start cartos-backend.service
 ```
 
 ```sh
-sudo systemctl status cartos.service
+sudo systemctl status cartos-backend.service
 ```
 
 # When running on the Orange Pi 3 W
@@ -158,7 +156,7 @@ sudo systemctl status cartos.service
 After the board reboots, there is a need to unplug and plug the USB of the NFC reader, then run
 
 ```sh
-sudo systemctl restart cartos
+sudo systemctl restart cartos-backend
 ```
 
 so the USB reader can be read by the backend application.
@@ -182,4 +180,4 @@ Installs the service to the daemon.
 
 ## `logs.sh`
 
-Opens logs of the `cartos.service`.
+Opens logs of the `cartos-backend.service`.
