@@ -9,9 +9,24 @@ Also, the code is not finished at all. Currently rewriting the one file code fro
 
 
 # Build
+
 > [!TIP]
 > Easiest way to build the app is run `make build`
 > in the project root.
+
+# Installation
+
+## Backend
+> [!TIP]
+> It is very appropriate to copy the build `app` from `backend/target/aarch64-unknown-linux-gnu/release/app`
+> to `/app` directory of the system together with `migrations` and `service` folder.
+> Then when running the service for the first time, install requirements using `install_requirements.sh`
+> and the service using `install.sh`. The logs can be displayed using `logs.sh`
+
+> [!NOTE]
+> This process will be probably automated in the future.
+
+
 
 # Run websocket testing utility on Linux
 
