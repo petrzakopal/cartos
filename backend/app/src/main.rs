@@ -1,5 +1,10 @@
-use common::{types::channels::{CardData, CardDataBroadcastChannel}, utils::{handle_tokio_result::handle_task_result, load_env::load_env}};
-use db::{connection::{get_sqlite_db_pool, user_validation}, initialize_db::{initialize_db, run_migrations_sqlite}};
+use common::{
+    hw::gpio::gpio_set_all_to_low, types::channels::{CardData, CardDataBroadcastChannel}, utils::{handle_tokio_result::handle_task_result, load_env::load_env}
+};
+use db::{
+    connection::{get_sqlite_db_pool, user_validation},
+    initialize_db::{initialize_db, run_migrations_sqlite},
+};
 use reader::core::connect::read_loop;
 use server::rest::start_http_server;
 use tracing::{debug, info};
@@ -21,8 +26,10 @@ async fn main() {
 
     info!("Starting the application.");
 
-    debug!("Initialize the database.");
+    debug!("Set all GPIO to LOW before operation.");
+    gpio_set_all_to_low();
 
+    debug!("Initialize the database.");
 
     load_env();
 
@@ -30,12 +37,12 @@ async fn main() {
     run_migrations_sqlite().await;
 
     // Create broadcast channel for sending messages from read_loop to the database connection
-    let (card_data_channel_sender, card_data_channel_receiver) = tokio::sync::broadcast::channel::<CardData>(300);
-    let card_data_broadcast_channel : CardDataBroadcastChannel = CardDataBroadcastChannel {
+    let (card_data_channel_sender, card_data_channel_receiver) =
+        tokio::sync::broadcast::channel::<CardData>(300);
+    let card_data_broadcast_channel: CardDataBroadcastChannel = CardDataBroadcastChannel {
         tx: card_data_channel_sender,
-        rx: card_data_channel_receiver
+        rx: card_data_channel_receiver,
     };
-
 
     // Reading card for ID or data
     let read_loop_handle = tokio::spawn(read_loop(card_data_broadcast_channel.tx.clone()));
@@ -44,17 +51,17 @@ async fn main() {
     // Also log entries to database
     let database_connection_handle = tokio::spawn(user_validation(card_data_broadcast_channel.tx));
 
-
     let http_server_handle = tokio::spawn(start_http_server(get_sqlite_db_pool().await));
 
-
     // Join threads
-    let (read_loop_tokjoin, database_connection_tokjoin, http_server_tokjoin) = tokio::join!(read_loop_handle, database_connection_handle, http_server_handle);
+    let (read_loop_tokjoin, database_connection_tokjoin, http_server_tokjoin) = tokio::join!(
+        read_loop_handle,
+        database_connection_handle,
+        http_server_handle
+    );
 
     // Handle the results gracefully
     handle_task_result(read_loop_tokjoin, "read_loop");
     handle_task_result(database_connection_tokjoin, "read_loop");
     handle_task_result(http_server_tokjoin, "http_server");
-
-
 }
