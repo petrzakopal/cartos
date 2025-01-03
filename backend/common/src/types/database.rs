@@ -21,3 +21,9 @@ pub struct UserEntry {
     updated_at: String,
     status: String
 }
+
+#[derive(Serialize, sqlx::FromRow, Debug, Clone)]
+pub struct ApplicationState {
+    pub id: i32,
+    pub do_reset: i32,
+}

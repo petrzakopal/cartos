@@ -16,6 +16,13 @@ result TEXT,
 note TEXT
 );
 
+
+
+CREATE TABLE IF NOT EXISTS application_state (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+do_reset INTEGER
+);
+
 CREATE TRIGGER IF NOT EXISTS update_user_updated_at
 AFTER UPDATE ON user
 FOR EACH ROW
