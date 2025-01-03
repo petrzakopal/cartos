@@ -1,9 +1,7 @@
-import { LogEntry, columns } from "@/components/logs/columns";
-import { DataTable } from "@/components/logs/data-table";
+import { UserEntry, columns } from "@/components/users/columns";
+import { DataTable } from "@/components/users/data-table";
 
-// get logs
-
-export const UserTable = ({loaderData}:{loaderData: LogEntry[]}) => {
+export const UserTable = ({loaderData}:{loaderData: UserEntry[]}) => {
     return (
         <>
             <div className="w-full relative">

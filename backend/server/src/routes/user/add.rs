@@ -59,6 +59,14 @@ pub async fn add_user(
         .unwrap_or("")
         .to_string();
 
+    card_data.status = body
+        .get("status")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    //let user_status = "active".to_string();
+
     // Check if the user submission is valid
 
     match card_data.validate() {
@@ -86,23 +94,20 @@ pub async fn add_user(
     }
 
     // Getting the data and mapping the results on a structn with correct naming
-    let mut query =
-        sqlx::query(r#"INSERT INTO user (card_serial_number, email, note) VALUES (?, ?, ?);"#)
+    let mut query : UserEntry =
+        sqlx::query_as(r#"INSERT INTO user (card_serial_number, email, note, status) VALUES (?, ?, ?, ?) RETURNING *;"#)
             .bind(&card_data.serial_number_string)
             .bind(&card_data.email)
             .bind(&card_data.note)
-            .execute(&app_state.db_sqlite_pool)
+            .bind(&card_data.status)
+            .fetch_one(&app_state.db_sqlite_pool)
             .await
             .unwrap();
 
 
     let res: Value = json!({
         "message": format!("Successfully added new user."),
-        "email": &card_data.email,
-        "card_data": {
-        "serial_number" : &card_data.serial_number_string
-    },
-        "note": &card_data.note,
+        "data": query,
         "status": "success"
     });
 

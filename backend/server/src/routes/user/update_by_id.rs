@@ -57,27 +57,29 @@ pub async fn update_user_by_id(
         .unwrap_or("")
         .to_string();
 
-    let mut id_to_update = body
-        .get("id")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(0)
-        ;
+    card_data.status = body
+        .get("status")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    let id_to_update = body.get("id").and_then(|v| v.as_i64()).unwrap_or(0);
 
     debug!("this is id_to_update {}", id_to_update);
 
-    if id_to_update == 0{
+    if id_to_update == 0 {
         error!("Submitted user data is not valid. Missing id to update the entry.");
-            let res: Value = json!({
-                "message": format!("Submitted user data is not valid. Missing id field."),
-                "status": "error"
-            });
+        let res: Value = json!({
+            "message": format!("Submitted user data is not valid. Missing id field."),
+            "status": "error"
+        });
 
-            let response_builder = Response::builder()
-                .status(200)
-                .header(CONTENT_TYPE, "application/json")
-                .body(Json(res).into_response().into_body())
-                .unwrap();
-            return response_builder;
+        let response_builder = Response::builder()
+            .status(200)
+            .header(CONTENT_TYPE, "application/json")
+            .body(Json(res).into_response().into_body())
+            .unwrap();
+        return response_builder;
     }
 
     id_to_update.to_string();
@@ -109,26 +111,27 @@ pub async fn update_user_by_id(
 
     // Getting the data and mapping the results on a structn with correct naming
     let mut query : UserEntry = sqlx::query_as(
-        r#"UPDATE user SET card_serial_number = ?, email = ?, note = ? WHERE id = ? RETURNING *;"#,
+        r#"UPDATE user SET card_serial_number = ?, email = ?, note = ?, status = ? WHERE id = ? RETURNING *;"#,
     )
     .bind(&card_data.serial_number_string)
     .bind(&card_data.email)
     .bind(&card_data.note)
+    .bind(&card_data.status)
     .bind(&id_to_update)
     .fetch_one(&app_state.db_sqlite_pool)
     .await
     .unwrap();
 
     let res: Value = json!({
-        "message": format!("Successfully updated user."),
-  //      "email": &card_data.email,
-  //      "card_data": {
-  //      "serial_number" : &card_data.serial_number_string
-  //  },
-  //      "note": &card_data.note,
-  //      "status": "success"
-        "data": query
-    });
+          "message": format!("Successfully updated user."),
+    //      "email": &card_data.email,
+    //      "card_data": {
+    //      "serial_number" : &card_data.serial_number_string
+    //  },
+    //      "note": &card_data.note,
+    //      "status": "success"
+          "data": query
+      });
 
     let response_builder = Response::builder()
         .status(200)

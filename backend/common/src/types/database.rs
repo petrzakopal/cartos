@@ -18,5 +18,6 @@ pub struct UserEntry {
     card_serial_number: String,
     email: String,
     note: Option<String>,
-    updated_at: String
+    updated_at: String,
+    status: String
 }
