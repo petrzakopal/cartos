@@ -1,4 +1,5 @@
 
+import { SpaceY } from "@/components/space";
 import { NavLink } from "react-router";
 
 
@@ -19,10 +20,10 @@ export default function Component({ loaderData }) {
         <>
             <div className="w-full flex flex-col">
                 <h1>{loaderData.title}</h1>
-                <span>test text about</span>
-                <NavLink to={"/"} >To Home</NavLink>
+                <span className="italic text-primary">under development</span>
+                <SpaceY mt="mt-5" />
                 <pre className="whitespace-pre-wrap">
-                    testing env variable: {import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}
+                    backend url: {import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}
                 </pre>
             </div>
         </>

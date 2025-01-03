@@ -11,18 +11,26 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.1.1",
     "@react-router/fs-routes": "^7.1.1",
     "@react-router/node": "^7.1.1",
+    "@tanstack/react-table": "^8.20.6",
+    "@types/node": "^22.10.5",
     "@types/react-helmet": "^6.1.11",
     "@types/react-router": "^5.1.20",
     "@types/react-router-dom": "^5.3.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "compression": "^1.7.5",
     "express": "^4.21.2",
     "isbot": "^5",
+    "lucide-react": "^0.469.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",
-    "serve-static": "^1.16.2"
+    "serve-static": "^1.16.2",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
