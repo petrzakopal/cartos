@@ -181,3 +181,30 @@ Installs the service to the daemon.
 ## `logs.sh`
 
 Opens logs of the `cartos-backend.service`.
+
+# Wifi problem
+
+When connected to the university wifi, there is a problem with wifi, which keeps disconnecting and the drivers must be loaded to reset the connection.
+
+```sh
+sudo rmmod sprdwl_ng && sudo modprobe sprdwl_ng
+```
+
+Tried to change the power saving mode using following commands.
+
+```sh
+sudo vim /etc/NetworkManager/conf.d/wifi-powersave.conf
+```
+
+Added following configuration.
+
+```ini
+[connection]
+wifi.powersave = 2
+```
+
+And restarted NetworkManager
+
+```sh
+sudo systemctl restart NetworkManager
+```
