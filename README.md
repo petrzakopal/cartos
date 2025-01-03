@@ -208,3 +208,9 @@ And restarted NetworkManager
 ```sh
 sudo systemctl restart NetworkManager
 ```
+
+# When trying to delete column from the database table
+
+Need to create a new table, copy data over to the new table and delete the old table and then rename the new table.
+
+Also when using triggers on the table, they must be also created as new triggers on the newly renamed table.
