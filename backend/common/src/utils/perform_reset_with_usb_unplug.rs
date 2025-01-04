@@ -1,9 +1,9 @@
 use std::{default, env, path::PathBuf};
 
 use sqlx::{Error, Pool, Sqlite, SqlitePool};
-use tracing::{error, info};
+use tracing::{debug, error, info};
 
-use crate::types::database::ApplicationState;
+use crate::{hw::gpio::gpio_unplug_and_plug_nfc_usb, types::database::ApplicationState};
 
 /// Copied from db to hack away the cyclic dependency
 async fn connect_db_sqlite() -> Result<SqlitePool, Error> {
@@ -66,22 +66,37 @@ pub async fn perform_reset_with_nfc_usb_unplug(db_client: Pool<Sqlite>) {
         return;
     }
 
-    let mut query_mapped: ApplicationState = sqlx::query_as(r#"SELECT * from application_state;"#)
-        .fetch_one(&db_pool)
-        .await
-        .unwrap();
+    debug!("Starting to test the application_state for reboot operation.");
 
-    match query_mapped.do_reset {
-        0 => {
-            info!("Set do_reset to TRUE for the next reboot.");
-        },
-        1 => {
+    let mut query_mapped: Result<ApplicationState, sqlx::Error> =
+        sqlx::query_as(r#"SELECT * from application_state;"#)
+            .fetch_one(&db_pool)
+            .await;
 
-            info!("Set do_reset to FALSE for next reboot, replug USB and restart the service.");
-        },
-        default => {
+    match query_mapped {
+        Ok(query) => {
+            match query.do_reset {
+                0 => {
+                    info!("Set do_reset to TRUE for the next reboot.");
+                    let query = sqlx::query(r#"UPDATE application_state SET do_reset = 1"#).
+                    execute(&db_pool).await;
 
-            info!("In application_state the do_reset has non valid value.");
+                    gpio_unplug_and_plug_nfc_usb().await;
+
+
+                }
+                1 => {
+                    info!("Set do_reset to FALSE for next reboot, replug USB and restart the service.");
+                    let query = sqlx::query(r#"UPDATE application_state SET do_reset = 0"#).
+                    execute(&db_pool).await;
+                }
+                default => {
+                    info!("In application_state the do_reset has non valid value.");
+                }
+            };
+        }
+        Err(e) => {
+            error!("Could not get the application_state from the db. {:#?}", e);
         }
     };
 }

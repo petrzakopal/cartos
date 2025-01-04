@@ -3,6 +3,7 @@ use tracing::{debug, error};
 
 const GPIO_PC8_ORANGEPI_ZERO_3: u32 = 72;
 const GPIO_PC9_ORANGEPI_ZERO_3: u32 = 73;
+const GPIO_PC6_ORANGEPI_ZERO_3 : u32 = 70;
 
 /// Placeholder for opening the lock
 pub fn gpio_indicate_user_authorized() -> Result<(), Box<dyn std::error::Error>> {
@@ -163,4 +164,16 @@ pub fn gpio_safely_set_out_val(
             error!("Could not obtain the gpio chip: {}, {:#?}", chip_name, e);
         }
     };
+}
+
+pub async fn gpio_unplug_and_plug_nfc_usb() {
+
+    gpio_safely_set_out_val("/dev/gpiochip0", GPIO_PC6_ORANGEPI_ZERO_3, "PC6", 0);
+    // Must test which works better
+    //tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
+
+    std::thread::sleep(std::time::Duration::from_millis(1500));
+
+    gpio_safely_set_out_val("/dev/gpiochip0", GPIO_PC6_ORANGEPI_ZERO_3, "PC6", 1);
+
 }
