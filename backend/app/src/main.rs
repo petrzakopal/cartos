@@ -36,7 +36,7 @@ async fn main() {
     initialize_db().await;
     run_migrations_sqlite().await;
 
-    perform_reset_with_usb_unplug::perform_reset_with_nfc_usb_unplug(get_sqlite_db_pool().await).await;
+    perform_reset_with_usb_unplug::perform_reset_with_nfc_usb_unplug().await;
 
     // Create broadcast channel for sending messages from read_loop to the database connection
     let (card_data_channel_sender, card_data_channel_receiver) =
@@ -61,6 +61,9 @@ async fn main() {
         database_connection_handle,
         http_server_handle
     );
+
+    // wil try to incorporate another async function spawned by the tokio
+    // which listens to the ctrl+c command and kills all the child processes and itself too
 
     // Handle the results gracefully
     handle_task_result(read_loop_tokjoin, "read_loop");
