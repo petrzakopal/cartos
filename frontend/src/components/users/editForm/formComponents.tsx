@@ -230,3 +230,50 @@ export const updateUserEntry = async (userData: UserEntry) => {
         return null;
     };
 }
+
+export const addNewUserEntry = async (userData: UserEntry) => {
+
+    const req_formatted = {
+
+        id: userData.id,
+        email: userData.email,
+        card_data: {
+            serial_number: userData.card_serial_number
+        },
+        status: userData.status,
+        note: userData.note
+    };
+
+
+    const req_body: string = JSON.stringify(req_formatted)
+    try {
+
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/user/add`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: req_body
+        });
+        const data = await response.json();
+
+        return data;
+
+    }
+    catch (e) {
+        console.error(e)
+        return null;
+    };
+}
+
+export const userActivityStatusOptions: UserStatus[] = [
+    {
+        value: "active",
+        displayValue: "Active"
+    },
+    {
+        value: "deactivated",
+        displayValue: "Deactivated"
+    }
+]
+

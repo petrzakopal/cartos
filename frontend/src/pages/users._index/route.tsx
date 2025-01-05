@@ -1,9 +1,10 @@
 import { PageTitle } from "@/components/navigation";
 import { UserTable } from "@/components/users/table-component";
+import { NavLink } from "react-router";
 
 type LoaderData = {
-  users: [];
-  title: string;
+    users: [];
+    title: string;
 };
 
 export async function clientLoader() {
@@ -36,11 +37,14 @@ export async function clientLoader() {
 }
 
 
-export default function Component({ loaderData }:{loaderData:LoaderData}) {
+export default function Component({ loaderData }: { loaderData: LoaderData }) {
     return (
         <>
             <div className="w-full flex flex-col">
                 <PageTitle text={loaderData.title} />
+                <div className="w-full flex flex-row relative">
+                    <NavLink to={"new"} className={"ml-auto hover:underline w-fit"}>Add new user</NavLink>
+                </div>
                 <UserTable loaderData={loaderData.users} />
             </div>
         </>
