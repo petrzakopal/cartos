@@ -1,5 +1,10 @@
+
 use common::{
-    hw::gpio::gpio_set_all_to_low, types::channels::{CardData, CardDataBroadcastChannel}, utils::{handle_tokio_result::handle_task_result, load_env::load_env, perform_reset_with_usb_unplug}
+    hw::gpio::gpio_set_all_to_low,
+    types::channels::{CardData, CardDataBroadcastChannel},
+    utils::{
+        handle_tokio_result::handle_task_result, load_env::load_env, perform_reset_with_usb_unplug,
+    },
 };
 use db::{
     connection::{get_sqlite_db_pool, user_validation},
@@ -55,6 +60,7 @@ async fn main() {
 
     let http_server_handle = tokio::spawn(start_http_server(get_sqlite_db_pool().await));
 
+
     // Join threads
     let (read_loop_tokjoin, database_connection_tokjoin, http_server_tokjoin) = tokio::join!(
         read_loop_handle,
@@ -70,3 +76,4 @@ async fn main() {
     handle_task_result(database_connection_tokjoin, "read_loop");
     handle_task_result(http_server_tokjoin, "http_server");
 }
+
