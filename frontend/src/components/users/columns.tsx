@@ -1,10 +1,10 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { Link, NavigateFunction, NavLink } from "react-router"
 import { updateUserEntry, UserEntry } from "./editForm/formComponents"
-import { useState } from "react";
+import { toast } from "sonner"
 
 
-export const useColumns = (data: UserEntry[], setData : React.Dispatch<React.SetStateAction<UserEntry[]>>): ColumnDef<UserEntry>[] => {
+export const useColumns = (data: UserEntry[], setData: React.Dispatch<React.SetStateAction<UserEntry[]>>): ColumnDef<UserEntry>[] => {
 
     return [
 
@@ -48,12 +48,29 @@ export const useColumns = (data: UserEntry[], setData : React.Dispatch<React.Set
 
                                     const updatedData: UserEntry = { ...originalData, status: "deactivated" };
 
+                                    const toastId = toast.loading(`Deativating user: ${originalData.email}`);
+
                                     const response = await updateUserEntry(updatedData);
-                                    setData((prevData) =>
-                                        prevData.map((entry) =>
-                                            entry.id === originalData.id ? response.data : entry
-                                        )
-                                    );
+
+                                    if (response != null) {
+
+                                        setData((prevData) =>
+                                            prevData.map((entry) =>
+                                                entry.id === originalData.id ? response.data : entry
+                                            )
+                                        );
+
+                                        toast.success("Successfully deactivated the user "+originalData.email+".",
+                                            {
+                                                id: toastId
+                                            })
+                                    }
+                                    else {
+                                        toast.error("Error when deactivating the user "+originalData.email+".",
+                                            {
+                                                id: toastId
+                                            })
+                                    }
 
                                     console.log(response)
 
@@ -68,12 +85,28 @@ export const useColumns = (data: UserEntry[], setData : React.Dispatch<React.Set
 
                                     const updatedData: UserEntry = { ...originalData, status: "active" };
 
+                                    const toastId = toast.loading(`Activating user: ${originalData.email}`);
+
                                     const response = await updateUserEntry(updatedData);
-                                    setData((prevData) =>
-                                        prevData.map((entry) =>
-                                            entry.id === originalData.id ? response.data : entry
-                                        )
-                                    );
+                                    if (response != null) {
+
+                                        setData((prevData) =>
+                                            prevData.map((entry) =>
+                                                entry.id === originalData.id ? response.data : entry
+                                            )
+                                        );
+
+                                        toast.success("Successfully activated the user "+originalData.email+".",
+                                            {
+                                                id: toastId
+                                            })
+                                    }
+                                    else {
+                                        toast.error("Error when activating the user."+originalData.email+".",
+                                            {
+                                                id: toastId
+                                            })
+                                    }
 
                                     console.log(response)
 

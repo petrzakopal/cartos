@@ -6,6 +6,7 @@ import {
     ScrollRestoration,
 } from "react-router";
 import { LayoutInner } from "./components/layout";
+import { Toaster } from "sonner";
 
 export function Layout({
     children,
@@ -25,6 +26,7 @@ export function Layout({
                 <Links />
             </head>
             <body className="flex flex-col relative min-h-screen w-full">
+                <Toaster />
                 <LayoutInner>
                     {children}
                 </LayoutInner>
