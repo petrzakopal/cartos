@@ -1,6 +1,7 @@
 import { PageTitle } from "@/components/navigation";
 import { SpaceY } from "@/components/space";
-import { FormSectionWithHeading, FormSelectInput, FormTextAreaInput, FormTextInput, TwoColumnFormInput, updateUserEntry, UserEntry, UserStatus } from "@/components/users/editForm/formComponents";
+import { FormSectionWithHeading, FormSelectInput, FormTextAreaInput, FormTextInput, TwoColumnFormInput, updateUserEntry, userActivityStatusOptions, UserEntry, UserStatus } from "@/components/users/editForm/formComponents";
+import { getApiUrl } from "@/lib/useApiUrl";
 import { useEffect, useState } from "react";
 import { SubmitHandler, useForm, UseFormRegister } from "react-hook-form";
 
@@ -21,7 +22,7 @@ export async function clientLoader() {
 
     try {
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/user/view/all`, {
+        const response = await fetch(`${getApiUrl()}/user/view/all`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -1,4 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table"
+import { UserStatusValues } from "../users/editForm/formComponents"
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -6,8 +7,7 @@ export type LogEntry = {
   id: number
   timestamp: string
   card_serial_number: string
-  result: string
-  status: "authenticated" | "not_authenticated"
+  status: UserStatusValues
   email: string
   note: string
 }
@@ -26,8 +26,8 @@ export const columns: ColumnDef<LogEntry>[] = [
     header: "Card Serial Number",
   },
   {
-    accessorKey: "result",
-    header: "Result",
+    accessorKey: "status",
+    header: "Status",
   },
   {
     accessorKey: "email",

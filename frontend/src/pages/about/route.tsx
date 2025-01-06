@@ -1,4 +1,5 @@
 
+import { ResetButton } from "@/components/hw/system_restart";
 import { SpaceY } from "@/components/space";
 import { NavLink } from "react-router";
 
@@ -25,6 +26,7 @@ export default function Component({ loaderData }) {
                 <pre className="whitespace-pre-wrap">
                     backend url: {import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}
                 </pre>
+                <ResetButton />
             </div>
         </>
     );

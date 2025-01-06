@@ -1,5 +1,6 @@
 import { LogTable } from "@/components/logs/table-component";
 import { PageTitle } from "@/components/navigation";
+import { getApiUrl } from "@/lib/useApiUrl";
 import { Helmet } from "react-helmet";
 
 type LoaderData = {
@@ -13,7 +14,7 @@ export async function clientLoader() {
 
     try {
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/log/view/all`, {
+        const response = await fetch(`${getApiUrl()}/log/view/all`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

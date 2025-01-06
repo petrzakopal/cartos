@@ -1,4 +1,5 @@
 import { ctw } from "@/lib/ctwHelper";
+import { getApiUrl } from "@/lib/useApiUrl";
 
 export type UserStatusValues = "active" | "deactivated";
 
@@ -16,6 +17,18 @@ export type UserEntry = {
     updated_at: string,
     status: UserStatusValues
 }
+
+export const userActivityStatusOptions: UserStatus[] = [
+    {
+        value: "active",
+        displayValue: "Active"
+    },
+    {
+        value: "deactivated",
+        displayValue: "Deactivated"
+    }
+]
+
 
 export const FormTextInput = ({
     id,
@@ -213,7 +226,7 @@ export const updateUserEntry = async (userData: UserEntry) => {
     const req_body: string = JSON.stringify(req_formatted)
     try {
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/user/update`, {
+        const response = await fetch(`${getApiUrl()}/user/update`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -248,7 +261,7 @@ export const addNewUserEntry = async (userData: UserEntry) => {
     const req_body: string = JSON.stringify(req_formatted)
     try {
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/user/add`, {
+        const response = await fetch(`${getApiUrl()}/user/add`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -265,15 +278,4 @@ export const addNewUserEntry = async (userData: UserEntry) => {
         return null;
     };
 }
-
-export const userActivityStatusOptions: UserStatus[] = [
-    {
-        value: "active",
-        displayValue: "Active"
-    },
-    {
-        value: "deactivated",
-        displayValue: "Deactivated"
-    }
-]
 

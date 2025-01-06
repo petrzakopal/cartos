@@ -2,11 +2,26 @@ import { LogTable } from "@/components/logs/table-component";
 import { PageTitle } from "@/components/navigation";
 import { Helmet } from "react-helmet";
 import { useEffect, useState } from "react";
+import { LogEntry } from "@/components/logs/columns";
+import { UserEntry } from "@/components/users/editForm/formComponents";
+import { toast } from "sonner";
+import { getApiUrl } from "@/lib/useApiUrl";
 
 type LoaderData = {
-  logs: [];
-  title: string;
+    logs: [];
+    title: string;
 };
+
+export enum MessageAction {
+    CardRead = "CardRead",
+    NewLogEntry = "NewLogEntry",
+    NewUserEntry = "NewUserEntry"
+}
+
+type WebsocketMessageBody = {
+    action: MessageAction,
+    data: LogEntry | UserEntry
+}
 
 export async function clientLoader() {
 
@@ -14,7 +29,7 @@ export async function clientLoader() {
 
     try {
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/log/view/all`, {
+        const response = await fetch(`${getApiUrl()}/log/view/all`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -38,19 +53,14 @@ export async function clientLoader() {
 }
 
 
-enum MessageAction {
-    CardRead,
-    NewLogEntry,
-    NewUserEntry
-}
 
-export default function Component({ loaderData }:{loaderData: LoaderData}) {
+export default function Component({ loaderData }: { loaderData: LoaderData }) {
 
-    const [message, setMessage] = useState("");
+    const [message, setMessage] = useState("{}");
     const [ws, setWs] = useState<WebSocket>(null);
 
     useEffect(() => {
-        const socket = new WebSocket(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/ws`);
+        const socket = new WebSocket(`${getApiUrl()}/ws`);
 
         socket.onopen = () => {
             console.log("Websocket connection estabilished.")
@@ -58,8 +68,13 @@ export default function Component({ loaderData }:{loaderData: LoaderData}) {
 
         socket.onmessage = (event) => {
             console.log("Message from server:", event.data);
-            console.log("parsed message: ", JSON.parse(message))
             setMessage(event.data);
+
+            const parsed_message = JSON.parse(event.data);
+
+            handleMessage(parsed_message);
+
+            console.log("parsed message: ", JSON.parse(event.data))
         }
 
         socket.onerror = (error) => {
@@ -74,28 +89,28 @@ export default function Component({ loaderData }:{loaderData: LoaderData}) {
 
 
         return () => {
-            if(socket) {
+            if (socket) {
                 socket.close()
             }
         }
     }, [])
 
-    const message_body = {
+    const message_body: WebsocketMessageBody = {
         action: MessageAction.CardRead,
         data: {
             id: 0,
             timestamp: "2025-01-03 12:56:30",
             card_serial_number: "04:4C:21:6A:2C:59:81",
-            email: "",
-            result: "not_authenticated",
-            note: null
+            email: "test@example.com",
+            result: "deactivated",
+            note: "",
         }
     }
 
     const message_body_serialized = JSON.stringify(message_body);
 
     const sendMessage = () => {
-        if(ws) {
+        if (ws) {
             //ws.send("Hello from the react vite frontend.")
             ws.send(message_body_serialized)
         }
@@ -107,7 +122,7 @@ export default function Component({ loaderData }:{loaderData: LoaderData}) {
                 <title>Logs</title>
             </Helmet>
             <div className="w-full flex flex-col">
-                <PageTitle text={loaderData.title}/>
+                <PageTitle text={loaderData.title} />
                 <span>message from server</span>
                 <pre className="whitespace-pre">{message}</pre>
                 <button className="w-fit p-3 text-white bg-tertiary" onClick={sendMessage}>Send message</button>
@@ -116,4 +131,26 @@ export default function Component({ loaderData }:{loaderData: LoaderData}) {
             </div>
         </>
     );
+}
+
+const handleMessage = (message: WebsocketMessageBody) => {
+
+    switch (message.action) {
+        case MessageAction.CardRead:
+            {
+                toast.info("New log of user: "+message.data.email+", with card_serial_number: "+message.data.card_serial_number+".",
+                    {
+                        closeButton: true
+                    })
+                break;
+            }
+        case MessageAction.NewLogEntry:
+            {
+                break;
+            }
+        case MessageAction.NewUserEntry:
+            {
+                break;
+            }
+    }
 }

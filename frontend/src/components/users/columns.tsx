@@ -62,13 +62,15 @@ export const useColumns = (data: UserEntry[], setData: React.Dispatch<React.SetS
 
                                         toast.success("Successfully deactivated the user "+originalData.email+".",
                                             {
-                                                id: toastId
+                                                id: toastId,
+                                                closeButton: true
                                             })
                                     }
                                     else {
                                         toast.error("Error when deactivating the user "+originalData.email+".",
                                             {
-                                                id: toastId
+                                                id: toastId,
+                                                closeButton: true
                                             })
                                     }
 
@@ -98,13 +100,15 @@ export const useColumns = (data: UserEntry[], setData: React.Dispatch<React.SetS
 
                                         toast.success("Successfully activated the user "+originalData.email+".",
                                             {
-                                                id: toastId
+                                                id: toastId,
+                                                closeButton: true
                                             })
                                     }
                                     else {
                                         toast.error("Error when activating the user."+originalData.email+".",
                                             {
-                                                id: toastId
+                                                id: toastId,
+                                                closeButton: true
                                             })
                                     }
 

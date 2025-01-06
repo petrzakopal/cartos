@@ -1,5 +1,6 @@
 import { PageTitle } from "@/components/navigation";
 import { UserTable } from "@/components/users/table-component";
+import { getApiUrl } from "@/lib/useApiUrl";
 import { NavLink } from "react-router";
 
 type LoaderData = {
@@ -13,7 +14,7 @@ export async function clientLoader() {
 
     try {
 
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}/user/view/all`, {
+        const response = await fetch(`${getApiUrl()}/user/view/all`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

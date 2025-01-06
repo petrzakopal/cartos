@@ -10,6 +10,8 @@ app.use('/assets', express.static(path.join(__dirname, 'build', 'client', 'asset
 // Serve the rest of your static files (e.g., index.html)
 app.use(express.static(path.join(__dirname, 'build')));
 
+app.use(express.static(path.join(__dirname, 'build', "client")));
+
 app.get('/', function (req, res) {
   res.sendFile(path.join(__dirname, 'build', 'client', 'index.html'));
 });
