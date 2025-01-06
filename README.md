@@ -10,8 +10,14 @@ Also, the code is not finished at all. Currently rewriting the one file code fro
 
 # Build
 
+## Backend
 > [!TIP]
-> Easiest way to build the app is run `make build`
+> Easiest way to build the backend app for the ARM64 is to run `make build-arm`
+> in the project root.
+
+## Frontend
+> [!TIP]
+> Easiest way to build the frontend app for the is to run `bun run build`
 > in the project root.
 
 # Installation
@@ -25,6 +31,26 @@ Also, the code is not finished at all. Currently rewriting the one file code fro
 
 > [!NOTE]
 > This process will be probably automated in the future.
+
+After copying the `app` and `migrations` (and `cartos.db`) to the target
+using for example `scp -r app orangepi@<ip-address>:/cartos/backend`, where when `app` is
+already present it is suitable to copy the `app` as `app_new` and then on the server
+manually rename `app_new` to `app` and restart the service using `sudo systemctl restart cartos-backend.service`
+or using frontend feature _HW System Restart_.
+
+## Frontend
+The frontend uses [bun](https://bun.sh/) as a runtime and build tool.
+
+To build the frontend simply run `bun run build` at the frontend folder.
+The build artefacts can be found in `build` directory.
+
+Then transfer the files of `server.js` and `build` directory to the `/cartos/frontend` path
+in the ARM64. Please note that the client side environmental varibales in Vite are embedded
+to the application at the runtime. So when using only client side part of the app, it is not
+needed to copy the `.env` file to the ARM64.
+
+The service running the application can be installed using the same `install.sh` script
+as the backend. It is not needed to reload the service when new files are loaded to the target.
 
 
 
@@ -121,9 +147,6 @@ To be able to use GPIO and NFC using pcsd use probably the following command.
 ```sh
 sudo docker run --device=/dev/gpiochip0 -v /var/run/pcscd/pcscd.comm:/var/run/pcscd/pcscd.comm gpio-rust-test
 ```
-
-> [!NOTE]  
-> When trying only to build, use the []().
 
 # Run the backend as a service in Linux
 
