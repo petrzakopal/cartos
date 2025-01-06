@@ -6,7 +6,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use common::types::database::LogEntry;
+use common::{types::database::LogEntry, utils::perform_reset_with_usb_unplug};
 use futures::TryStreamExt;
 use serde_json::Value;
 use sqlx::Row;
@@ -21,7 +21,7 @@ pub async fn do_restart_service(
 ) -> impl IntoResponse {
 
         let res: Value = serde_json::from_str(
-            r#"{"message":"The database connection pool is closed.", "status":"error"}"#,
+            r#"{"message":"Restarting the app.", "status":"error"}"#,
         )
         .unwrap();
 
@@ -31,12 +31,13 @@ pub async fn do_restart_service(
         .body(Json(res).into_response().into_body())
         .unwrap();
 
-    let service_name = "cartos-backend.service"; // Replace with your actual service name
-    let status: ExitStatus = Command::new("systemctl")
-        .arg("restart")
-        .arg(service_name)
-        .status()
-        .expect("Failed to execute command");
+    perform_reset_with_usb_unplug::perform_reset_with_nfc_usb_unplug().await;
+    //let service_name = "cartos-backend.service"; // Replace with your actual service name
+    //let status: ExitStatus = Command::new("systemctl")
+    //    .arg("restart")
+    //    .arg(service_name)
+    //    .status()
+    //    .expect("Failed to execute command");
 
     return response_builder;
 }

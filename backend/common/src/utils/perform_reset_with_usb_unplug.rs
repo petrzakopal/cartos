@@ -122,34 +122,72 @@ pub async fn perform_reset_with_nfc_usb_unplug() {
                                 Ok(output) if !output.stdout.is_empty() => {
                                     // Get the PID of the process using the port
                                     let pid_str = String::from_utf8_lossy(&output.stdout);
-                                    let pid = pid_str.trim().parse::<u32>().ok();
+                                    let pids: Vec<&str> = pid_str.lines().collect();
+                                    debug!("PIDs to kill {:#?}", pids);
+                                    //let pid = pid_str.trim().parse::<u32>().ok();
+
+
+                            let current_exe =
+                                env::current_exe().expect("Failed to get current executable path");
+                            debug!(
+                                "The current executable path of the application is {:#?}",
+                                current_exe
+                            );
+                            // spawning the new app
+                            //tokio::process::Command::new(current_exe.clone())
+                            //    .spawn()
+                            //    .expect("Failed to spawn new instance");
+
+                            //        if pids.is_empty() {
+                            //            warn!("No process found running the port.")
+                            //        } else {
+                            //            for pid in pids {
+                            //                println!("Killing PID: {}", pid);
+                            //                let kill_status = std::process::Command::new("kill")
+                            //                    .arg("-9") // Force kill
+                            //                    .arg(pid)
+                            //                    .stdout(std::process::Stdio::null())
+                            //                    .stderr(std::process::Stdio::null())
+                            //                    .status();
+
+                            //                match kill_status {
+                            //                    Ok(status) if status.success() => {
+                            //                        debug!("Successfully killed PID: {}", pid)
+                            //                    }
+                            //                    Ok(_) => error!("Failed to kill PID: {}", pid),
+                            //                    Err(err) => {
+                            //                        error!("Error killing PID {}: {}", pid, err)
+                            //                    }
+                            //                }
+                            //            }
+                            //        }
 
                                     // if so
-                                    if let Some(pid) = pid {
-                                        // Kill the process using the found PID
-                                        let kill_output = tokio::process::Command::new("kill")
-                                            .arg("-TERM")
-                                            .arg(pid.to_string())
-                                            .output()
-                                            .await
-                                            .unwrap();
+                                    //if let Some(pid) = pid {
+                                    //    // Kill the process using the found PID
+                                    //    let kill_output = tokio::process::Command::new("kill")
+                                    //        .arg("-TERM")
+                                    //        .arg(pid.to_string())
+                                    //        .output()
+                                    //        .await
+                                    //        .unwrap();
 
-                                        if !kill_output.status.success() {
-                                            error!("Failed to send kill signal to the process");
-                                            //return Err(std::io::Error::new(
-                                            //    std::io::ErrorKind::Other,
-                                            //    "Failed to kill process",
-                                            //));
-                                            return;
-                                        }
+                                    //    if !kill_output.status.success() {
+                                    //        error!("Failed to send kill signal to the process");
+                                    //        //return Err(std::io::Error::new(
+                                    //        //    std::io::ErrorKind::Other,
+                                    //        //    "Failed to kill process",
+                                    //        //));
+                                    //        return;
+                                    //    }
 
-                                        info!("Successfully killed the process with PID {}", pid);
-                                    } else {
-                                        // Err(std::io::Error::new(
-                                        //     std::io::ErrorKind::Other,
-                                        //     "Invalid PID",
-                                        // ));
-                                    }
+                                    //    info!("Successfully killed the process with PID {}", pid);
+                                    //} else {
+                                    //    // Err(std::io::Error::new(
+                                    //    //     std::io::ErrorKind::Other,
+                                    //    //     "Invalid PID",
+                                    //    // ));
+                                    //}
                                 }
                                 _ => {
                                     info!("No process is using port {}", 4000);
@@ -168,6 +206,7 @@ pub async fn perform_reset_with_nfc_usb_unplug() {
                                 .expect("Failed to spawn new instance");
 
                             warn!("Terminating the current standalone app instance.");
+
 
                             // exit the process
                             std::process::exit(0);

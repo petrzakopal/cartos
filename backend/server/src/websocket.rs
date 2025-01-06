@@ -104,19 +104,22 @@ async fn process_message(
     match msg {
         Message::Text(t) => {
             println!(">>> {who} sent str: {t:?}");
+            // this broadcasts the message to all connected clients
             app_state
                 .clients
                 .broadcast(Message::Text(format!(
-                    "sending message to all clients {}",
+                    "{}",
                     t
                 )))
                 .await;
 
+            // this sends the message as an echo only to the sender
             if sender
                 .lock()
                 .await
                 .send(Message::Text(
-                    format!("Hello from websockets recv_task, you have sent {}", t).into(),
+                    //format!("Hello from websockets recv_task, you have sent {}", t).into(),
+                    format!("{}", t).into(),
                 ))
                 .await
                 .is_err()
