@@ -4,6 +4,8 @@ use tracing::{debug, error};
 const GPIO_PC8_ORANGEPI_ZERO_3: u32 = 72;
 const GPIO_PC9_ORANGEPI_ZERO_3: u32 = 73;
 const GPIO_PC6_ORANGEPI_ZERO_3 : u32 = 70;
+const GPIO_PC15_ORANGEPI_ZERO_3 : u32 = 79;
+const GPIO_PC7_ORANGEPI_ZERO_3 : u32 = 71;
 
 /// Placeholder for opening the lock
 pub fn gpio_indicate_user_authorized() -> Result<(), Box<dyn std::error::Error>> {
@@ -117,7 +119,7 @@ pub fn gpio_safely_set_out_val(
 
             match handle {
                 Ok(handle) => {
-                    let gpio = handle.request(LineRequestFlags::OUTPUT, level, "rust-gpio");
+                    let gpio = handle.request(LineRequestFlags::OUTPUT, 0, "rust-gpio");
                     debug!("Successfully obtained the gpio handle.");
                     match gpio {
                         Ok(gpio) => {
@@ -128,7 +130,7 @@ pub fn gpio_safely_set_out_val(
 
                             debug!("Set {} to {}", gpio_human_readable_name, level);
                             // Set the output to low
-                            let val = gpio.set_value(0);
+                            let val = gpio.set_value(level);
                             match val {
                                 Ok(v) => {
                                     debug!(
@@ -168,12 +170,12 @@ pub fn gpio_safely_set_out_val(
 
 pub async fn gpio_unplug_and_plug_nfc_usb() {
 
-    gpio_safely_set_out_val("/dev/gpiochip0", GPIO_PC6_ORANGEPI_ZERO_3, "PC6", 0);
+    gpio_safely_set_out_val("/dev/gpiochip0", GPIO_PC7_ORANGEPI_ZERO_3, "PC7", 1);
     // Must test which works better
     //tokio::time::sleep(tokio::time::Duration::from_millis(1500)).await;
 
-    std::thread::sleep(std::time::Duration::from_millis(1500));
+    std::thread::sleep(std::time::Duration::from_millis(2500));
 
-    gpio_safely_set_out_val("/dev/gpiochip0", GPIO_PC6_ORANGEPI_ZERO_3, "PC6", 1);
+    gpio_safely_set_out_val("/dev/gpiochip0", GPIO_PC7_ORANGEPI_ZERO_3, "PC7", 0);
 
 }

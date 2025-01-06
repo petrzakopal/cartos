@@ -3,6 +3,7 @@
 use std::net::SocketAddr;
 
 use axum::Router;
+use common::types::websockets::WebsocketMessageBody;
 use owo_colors::colors::css::*;
 use owo_colors::OwoColorize;
 use sqlx::{Pool, Sqlite};
@@ -16,8 +17,8 @@ struct ConnectionSettings {
     http: u16,
 }
 
-pub async fn start_http_server(db_client: Pool<Sqlite>) {
-    let router: Router = create_routes(db_client);
+pub async fn start_http_server(db_client: Pool<Sqlite>, ws_body_channel_sender: tokio::sync::broadcast::Sender<WebsocketMessageBody>) {
+    let router: Router = create_routes(db_client, ws_body_channel_sender);
 
     let port_http: u16 = std::env::var("PORT_RS_HTTP")
         .unwrap_or_else(|_| "4000".to_string())

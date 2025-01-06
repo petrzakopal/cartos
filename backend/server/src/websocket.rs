@@ -8,8 +8,8 @@ use axum::{
     response::IntoResponse,
 };
 use axum_extra::{headers, TypedHeader};
-use common::utils::handle_tokio_result::handle_task_result;
-use tracing::{error, info};
+use common::{types::{database::{CardRead, LogEntry}, websockets::MessageAction}, utils::handle_tokio_result::handle_task_result};
+use tracing::{debug, error, info};
 
 //allows to split the websocket stream into separate TX and RX branches
 use futures::{
@@ -50,6 +50,7 @@ async fn handle_socket(
     // Adding client to a hash map
     app_state.clients.add(sender.clone()).await;
     let send_task_state = Arc::clone(&app_state);
+    let actions_task_state = Arc::clone(&app_state);
 
     // Spawn a task that will push several messages to the client (does not matter what client does)
     let mut send_task = tokio::spawn({
@@ -66,6 +67,56 @@ async fn handle_socket(
             {
                 error!("Error sending message in send task.");
             }
+        }
+        // Trying to send some message
+    });
+
+    let mut actions_task = tokio::spawn({
+        let sender = Arc::clone(&sender);
+        let mut ws_body_receiver = actions_task_state.ws_body_channel_sender.subscribe();
+        async move {
+
+    while let Ok(ws_data) = ws_body_receiver.recv().await {
+        debug!(
+            "Recevied data for websockets from the backend {:#?}",
+            ws_data
+        );
+
+                match ws_data.action {
+                    MessageAction::CardRead => {
+
+            if sender
+                .lock()
+                .await
+                .send(Message::Text(
+                    format!("{}", serde_json::to_string(&ws_data).unwrap_or(String::from("{}"))).into(),
+                ))
+                .await
+                .is_err()
+            {
+                error!("Error sending message in send task.");
+            }
+
+                    },
+                    MessageAction::NewLogEntry => {
+
+                    }
+                    MessageAction::NewUserEntry => {
+
+                    }
+                };
+            }
+            //if sender
+            //    .lock()
+            //    .await
+            //    .send(Message::Text(
+            //        format!("Hello from websockets send_task").into(),
+            //    ))
+            //    .await
+            //    .is_err()
+            //{
+            //    error!("Error sending message in send task.");
+            //}
         }
         // Trying to send some message
     });

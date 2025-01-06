@@ -8,7 +8,7 @@ pub struct LogEntry {
     //#[sqlx(rename = "cardSerialNumber")]
     card_serial_number: String,
     email: String,
-    result: String,
+    status: String,
     note: Option<String>,
 }
 
@@ -20,6 +20,11 @@ pub struct UserEntry {
     note: Option<String>,
     updated_at: String,
     status: String
+}
+
+#[derive(Serialize, sqlx::FromRow, Debug, Clone)]
+pub struct CardRead {
+    pub card_serial_number: String,
 }
 
 #[derive(Serialize, sqlx::FromRow, Debug, Clone)]

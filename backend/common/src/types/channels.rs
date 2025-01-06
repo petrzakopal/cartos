@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
+use super::websockets::WebsocketMessageBody;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CardData {
     pub serial_number_string: String,
@@ -48,4 +50,10 @@ impl CardData {
 pub struct CardDataBroadcastChannel {
     pub tx: tokio::sync::broadcast::Sender<CardData>,
     pub rx: tokio::sync::broadcast::Receiver<CardData>,
+}
+
+#[derive(Debug)]
+pub struct WebsocketBodyBroadcastChannel {
+    pub tx: tokio::sync::broadcast::Sender<WebsocketMessageBody>,
+    pub rx: tokio::sync::broadcast::Receiver<WebsocketMessageBody>,
 }

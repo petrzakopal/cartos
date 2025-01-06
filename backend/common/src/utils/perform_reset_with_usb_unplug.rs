@@ -126,41 +126,45 @@ pub async fn perform_reset_with_nfc_usb_unplug() {
                                     debug!("PIDs to kill {:#?}", pids);
                                     //let pid = pid_str.trim().parse::<u32>().ok();
 
+                                    let current_exe = env::current_exe()
+                                        .expect("Failed to get current executable path");
+                                    debug!(
+                                        "The current executable path of the application is {:#?}",
+                                        current_exe
+                                    );
 
-                            let current_exe =
-                                env::current_exe().expect("Failed to get current executable path");
-                            debug!(
-                                "The current executable path of the application is {:#?}",
-                                current_exe
-                            );
-                            // spawning the new app
-                            //tokio::process::Command::new(current_exe.clone())
-                            //    .spawn()
-                            //    .expect("Failed to spawn new instance");
+                                    if pids.is_empty() {
+                                        warn!("No process found running the port.");
 
-                            //        if pids.is_empty() {
-                            //            warn!("No process found running the port.")
-                            //        } else {
-                            //            for pid in pids {
-                            //                println!("Killing PID: {}", pid);
-                            //                let kill_status = std::process::Command::new("kill")
-                            //                    .arg("-9") // Force kill
-                            //                    .arg(pid)
-                            //                    .stdout(std::process::Stdio::null())
-                            //                    .stderr(std::process::Stdio::null())
-                            //                    .status();
+                                        // spawning the new app
+                                        tokio::process::Command::new(current_exe.clone())
+                                            .spawn()
+                                            .expect("Failed to spawn new instance");
+                                    } else {
+                                        // spawning the new app
+                                        tokio::process::Command::new(current_exe.clone())
+                                            .spawn()
+                                            .expect("Failed to spawn new instance");
+                                        for pid in pids {
+                                            warn!("Killing PID: {}", pid);
+                                            let kill_status = std::process::Command::new("kill")
+                                                .arg("-9") // Force kill
+                                                .arg(pid)
+                                                .stdout(std::process::Stdio::null())
+                                                .stderr(std::process::Stdio::null())
+                                                .status();
 
-                            //                match kill_status {
-                            //                    Ok(status) if status.success() => {
-                            //                        debug!("Successfully killed PID: {}", pid)
-                            //                    }
-                            //                    Ok(_) => error!("Failed to kill PID: {}", pid),
-                            //                    Err(err) => {
-                            //                        error!("Error killing PID {}: {}", pid, err)
-                            //                    }
-                            //                }
-                            //            }
-                            //        }
+                                            match kill_status {
+                                                Ok(status) if status.success() => {
+                                                    debug!("Successfully killed PID: {}", pid)
+                                                }
+                                                Ok(_) => error!("Failed to kill PID: {}", pid),
+                                                Err(err) => {
+                                                    error!("Error killing PID {}: {}", pid, err)
+                                                }
+                                            }
+                                        }
+                                    }
 
                                     // if so
                                     //if let Some(pid) = pid {
@@ -201,15 +205,14 @@ pub async fn perform_reset_with_nfc_usb_unplug() {
                                 current_exe
                             );
                             // spawning the new app
-                            tokio::process::Command::new(current_exe.clone())
-                                .spawn()
-                                .expect("Failed to spawn new instance");
+                            //tokio::process::Command::new(current_exe.clone())
+                            //    .spawn()
+                            //    .expect("Failed to spawn new instance");
 
                             warn!("Terminating the current standalone app instance.");
 
-
                             // exit the process
-                            std::process::exit(0);
+                            //std::process::exit(0);
                         }
                         ApplicationRunMode::Service => {
                             warn!("Terminating the current service instance.");

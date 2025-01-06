@@ -1,7 +1,7 @@
 
 use common::{
     hw::gpio::gpio_set_all_to_low,
-    types::channels::{CardData, CardDataBroadcastChannel},
+    types::{channels::{CardData, CardDataBroadcastChannel, WebsocketBodyBroadcastChannel}, websockets::WebsocketMessageBody},
     utils::{
         handle_tokio_result::handle_task_result, load_env::load_env, perform_reset_with_usb_unplug,
     },
@@ -51,14 +51,22 @@ async fn main() {
         rx: card_data_channel_receiver,
     };
 
+    // Create broadcast channel for sending websocket messages
+    let (websocket_message_channel_sender, websocket_message_channel_receiver) =
+        tokio::sync::broadcast::channel::<WebsocketMessageBody>(300);
+    let ws_message_broadcast_channel: WebsocketBodyBroadcastChannel = WebsocketBodyBroadcastChannel {
+        tx: websocket_message_channel_sender,
+        rx: websocket_message_channel_receiver,
+    };
+
     // Reading card for ID or data
     let read_loop_handle = tokio::spawn(read_loop(card_data_broadcast_channel.tx.clone()));
 
     // Reaching to database for validation of users
     // Also log entries to database
-    let database_connection_handle = tokio::spawn(user_validation(card_data_broadcast_channel.tx));
+    let database_connection_handle = tokio::spawn(user_validation(card_data_broadcast_channel.tx, ws_message_broadcast_channel.tx.clone()));
 
-    let http_server_handle = tokio::spawn(start_http_server(get_sqlite_db_pool().await));
+    let http_server_handle = tokio::spawn(start_http_server(get_sqlite_db_pool().await, ws_message_broadcast_channel.tx.clone()));
 
 
     // Join threads

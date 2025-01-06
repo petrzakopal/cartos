@@ -1,5 +1,12 @@
-use common::{hw::gpio::gpio_indicate_user_authorized, types::channels::CardData};
-use tracing::{debug, error, info, warn};
+use common::{
+    hw::gpio::gpio_indicate_user_authorized,
+    types::{
+        channels::CardData,
+        database::CardRead,
+        websockets::{WebsocketMessageBody, WebsocketMessageData},
+    },
+};
+use tracing::{debug, error, field::debug, info, warn};
 // provides `try_next`
 use futures::TryStreamExt;
 // provides `try_get`
@@ -18,7 +25,10 @@ pub async fn get_sqlite_db_pool() -> Pool<Sqlite> {
     return pool;
 }
 
-pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::Sender<CardData>) {
+pub async fn user_validation(
+    card_data_channel_sender: tokio::sync::broadcast::Sender<CardData>,
+    ws_body_channel_sender: tokio::sync::broadcast::Sender<WebsocketMessageBody>,
+) {
     let mut receiver = card_data_channel_sender.subscribe();
 
     while let Ok(card_data) = receiver.recv().await {
@@ -37,12 +47,26 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
             }
         };
 
+        let card_read: CardRead = CardRead {
+            card_serial_number: card_data.serial_number_string.clone(),
+        };
+
+        let ws_body: WebsocketMessageBody = WebsocketMessageBody {
+            action: common::types::websockets::MessageAction::CardRead,
+            data: WebsocketMessageData::CardRead(card_read),
+        };
+
+        debug!("Sending ws data by channel {:#?}", ws_body);
+
+        let _ = ws_body_channel_sender.send(ws_body);
+
         // Expecting that when very simple db table with users and their respective cardSerialNumber
         // is used, there is always only one entry with the serial_card_number which is being searched for
         // so the loop can be broken if one entry is found.
-        let mut users_fetched = sqlx::query(r#"SELECT * FROM user WHERE card_serial_number = ? AND status = 'active'"#)
-            .bind(&card_data.serial_number_string)
-            .fetch(&pool);
+        let mut users_fetched =
+            sqlx::query(r#"SELECT * FROM user WHERE card_serial_number = ? AND status = 'active'"#)
+                .bind(&card_data.serial_number_string)
+                .fetch(&pool);
 
         let mut validated_user_email: String = String::default();
         let mut is_user_validated: bool = false;
@@ -96,7 +120,7 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
             debug!("Will log the SUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
 
             let mut inserted_log_entry = sqlx::query(
-                r#"INSERT INTO log (card_serial_number, email, result) VALUES (?, ?, ?);"#,
+                r#"INSERT INTO log (card_serial_number, email, status) VALUES (?, ?, ?);"#,
             )
             .bind(&card_data.serial_number_string)
             .bind(validated_user_email)
@@ -118,7 +142,7 @@ pub async fn user_validation(card_data_channel_sender: tokio::sync::broadcast::S
             debug!("Will log the UNSUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
 
             let mut inserted_log_entry = sqlx::query(
-                r#"INSERT INTO log (card_serial_number, email, result) VALUES (?, ?, ?);"#,
+                r#"INSERT INTO log (card_serial_number, email, status) VALUES (?, ?, ?);"#,
             )
             .bind(&card_data.serial_number_string)
             .bind(validated_user_email)

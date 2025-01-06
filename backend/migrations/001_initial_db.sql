@@ -12,7 +12,7 @@ id INTEGER PRIMARY KEY AUTOINCREMENT,
 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 card_serial_number TEXT NOT NULL,
 email TEXT NOT NULL,
-result TEXT,
+status TEXT,
 note TEXT
 );
 
