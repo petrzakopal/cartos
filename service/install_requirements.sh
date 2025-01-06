@@ -53,3 +53,7 @@ sudo systemctl start pcscd
 
 sudo udevadm control --reload-rules
 sudo udevadm trigger
+
+echo "Installing bun for frontend."
+
+curl -fsSL https://bun.sh/install | bash
