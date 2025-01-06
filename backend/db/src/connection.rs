@@ -2,7 +2,7 @@ use common::{
     hw::gpio::gpio_indicate_user_authorized,
     types::{
         channels::CardData,
-        database::CardRead,
+        database::{CardRead, LogEntry},
         websockets::{WebsocketMessageBody, WebsocketMessageData},
     },
 };
@@ -119,14 +119,15 @@ pub async fn user_validation(
         if is_user_validated {
             debug!("Will log the SUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
 
-            let mut inserted_log_entry = sqlx::query(
-                r#"INSERT INTO log (card_serial_number, email, status) VALUES (?, ?, ?);"#,
+            let mut inserted_log_entry : LogEntry = sqlx::query_as(
+                r#"INSERT INTO log (card_serial_number, email, status) VALUES (?, ?, ?) RETURNING *;"#,
             )
             .bind(&card_data.serial_number_string)
             .bind(validated_user_email)
             .bind("authenticated")
-            .execute(&pool)
-            .await; //.expect("could not insert log to the db");
+            .fetch_one(&pool)
+            .await
+            .unwrap(); //.expect("could not insert log to the db");
 
             let gpio_res = gpio_indicate_user_authorized();
 
@@ -138,6 +139,24 @@ pub async fn user_validation(
                     error!("Did not perform the gpio operation successfully. {:#?}", e)
                 }
             };
+
+        let logged_user: LogEntry = LogEntry {
+                id: inserted_log_entry.id,
+                timestamp: inserted_log_entry.timestamp,
+                card_serial_number: inserted_log_entry.card_serial_number,
+                email: inserted_log_entry.email,
+                status: inserted_log_entry.status,
+                note: inserted_log_entry.note
+        };
+
+        let ws_body: WebsocketMessageBody = WebsocketMessageBody {
+            action: common::types::websockets::MessageAction::NewLogEntry,
+            data: WebsocketMessageData::LogEntry(logged_user),
+        };
+
+        debug!("Sending ws data by channel {:#?}", ws_body);
+
+        let _ = ws_body_channel_sender.send(ws_body);
         } else {
             debug!("Will log the UNSUCCESSFUL action of serial_card_number: {} by user email: {} to the db.", &card_data.serial_number_string, validated_user_email);
 

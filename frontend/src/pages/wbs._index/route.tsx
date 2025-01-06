@@ -1,4 +1,3 @@
-import { LogTable } from "@/components/logs/table-component";
 import { PageTitle } from "@/components/navigation";
 import { Helmet } from "react-helmet";
 import { useEffect, useState } from "react";
@@ -6,50 +5,18 @@ import { LogEntry } from "@/components/logs/columns";
 import { UserEntry } from "@/components/users/editForm/formComponents";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/useApiUrl";
+import { handleMessage, MessageAction, WebsocketMessageBody } from "@/lib/websockets";
 
 type LoaderData = {
     logs: [];
     title: string;
 };
 
-export enum MessageAction {
-    CardRead = "CardRead",
-    NewLogEntry = "NewLogEntry",
-    NewUserEntry = "NewUserEntry"
-}
-
-type WebsocketMessageBody = {
-    action: MessageAction,
-    data: LogEntry | UserEntry
-}
-
 export async function clientLoader() {
 
-    const req_body: string = JSON.stringify({})
-
-    try {
-
-        const response = await fetch(`${getApiUrl()}/log/view/all`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: req_body
-        });
-        const data = await response.json();
-
         return {
             title: "Logs with websockets",
-            logs: data
         };
-    }
-    catch (e) {
-        console.error(e)
-        return {
-            title: "Logs with websockets",
-            logs: JSON.parse('{"msg":"no logs"}')
-        };
-    };
 }
 
 
@@ -102,7 +69,7 @@ export default function Component({ loaderData }: { loaderData: LoaderData }) {
             timestamp: "2025-01-03 12:56:30",
             card_serial_number: "04:4C:21:6A:2C:59:81",
             email: "test@example.com",
-            result: "deactivated",
+            status: "deactivated",
             note: "",
         }
     }
@@ -125,32 +92,9 @@ export default function Component({ loaderData }: { loaderData: LoaderData }) {
                 <PageTitle text={loaderData.title} />
                 <span>message from server</span>
                 <pre className="whitespace-pre">{message}</pre>
-                <button className="w-fit p-3 text-white bg-tertiary" onClick={sendMessage}>Send message</button>
-
-                {/*<LogTable loaderData={loaderData.logs} />*/}
+                <button className="w-fit p-3 text-white bg-tertiary" onClick={sendMessage}>Send test message</button>
             </div>
         </>
     );
 }
 
-const handleMessage = (message: WebsocketMessageBody) => {
-
-    switch (message.action) {
-        case MessageAction.CardRead:
-            {
-                toast.info("New log of user: "+message.data.email+", with card_serial_number: "+message.data.card_serial_number+".",
-                    {
-                        closeButton: true
-                    })
-                break;
-            }
-        case MessageAction.NewLogEntry:
-            {
-                break;
-            }
-        case MessageAction.NewUserEntry:
-            {
-                break;
-            }
-    }
-}

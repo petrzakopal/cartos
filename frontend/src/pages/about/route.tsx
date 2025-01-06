@@ -1,6 +1,8 @@
 
 import { ResetButton } from "@/components/hw/system_restart";
+import { PageTitle } from "@/components/navigation";
 import { SpaceY } from "@/components/space";
+import { getApiUrl } from "@/lib/useApiUrl";
 import { NavLink } from "react-router";
 
 
@@ -20,12 +22,16 @@ export default function Component({ loaderData }) {
     return (
         <>
             <div className="w-full flex flex-col">
-                <h1>{loaderData.title}</h1>
-                <span className="italic text-primary">under development</span>
-                <SpaceY mt="mt-5" />
+                <PageTitle text={loaderData.title} />
+                <SpaceY mt="mt-12" />
                 <pre className="whitespace-pre-wrap">
-                    backend url: {import.meta.env.VITE_BACKEND_URL_VISIBLE_IN_THE_FRONTEND}
+                    backend url: {getApiUrl()}
                 </pre>
+                <span>Source code of the application is Open Source at <NavLink className="italic text-primary" to={"https://github.com/petrzakopal/cartos"}>petrzakopal/cartos</NavLink>.</span>
+                <p>If there are any problems with the application contact the maintainers of the repository.</p>
+                <SpaceY mt="mt-12" />
+                <span className="text-xl font-bold">Control panel</span>
+                <SpaceY mt="mt-4" />
                 <ResetButton />
             </div>
         </>

@@ -8,7 +8,13 @@ use axum::{
     response::IntoResponse,
 };
 use axum_extra::{headers, TypedHeader};
-use common::{types::{database::{CardRead, LogEntry}, websockets::MessageAction}, utils::handle_tokio_result::handle_task_result};
+use common::{
+    types::{
+        database::{CardRead, LogEntry},
+        websockets::MessageAction,
+    },
+    utils::handle_tokio_result::handle_task_result,
+};
 use tracing::{debug, error, info};
 
 //allows to split the websocket stream into separate TX and RX branches
@@ -56,12 +62,12 @@ async fn handle_socket(
     let mut send_task = tokio::spawn({
         let sender = Arc::clone(&sender);
         async move {
+            let msg = serde_json::from_str(r#"{"message"": "Hello from websockets send_task".}"#)
+                .unwrap_or(String::from("{}"));
             if sender
                 .lock()
                 .await
-                .send(Message::Text(
-                    format!("Hello from websockets send_task").into(),
-                ))
+                .send(Message::Text(format!("{}", msg).into()))
                 .await
                 .is_err()
             {
@@ -75,35 +81,48 @@ async fn handle_socket(
         let sender = Arc::clone(&sender);
         let mut ws_body_receiver = actions_task_state.ws_body_channel_sender.subscribe();
         async move {
-
-    while let Ok(ws_data) = ws_body_receiver.recv().await {
-        debug!(
-            "Recevied data for websockets from the backend {:#?}",
-            ws_data
-        );
+            while let Ok(ws_data) = ws_body_receiver.recv().await {
+                debug!(
+                    "Recevied data for websockets from the backend {:#?}",
+                    ws_data
+                );
 
                 match ws_data.action {
                     MessageAction::CardRead => {
-
-            if sender
-                .lock()
-                .await
-                .send(Message::Text(
-                    format!("{}", serde_json::to_string(&ws_data).unwrap_or(String::from("{}"))).into(),
-                ))
-                .await
-                .is_err()
-            {
-                error!("Error sending message in send task.");
-            }
-
-                    },
+                        if sender
+                            .lock()
+                            .await
+                            .send(Message::Text(
+                                format!(
+                                    "{}",
+                                    serde_json::to_string(&ws_data).unwrap_or(String::from("{}"))
+                                )
+                                .into(),
+                            ))
+                            .await
+                            .is_err()
+                        {
+                            error!("Error sending message in send task.");
+                        }
+                    }
                     MessageAction::NewLogEntry => {
-
+                        if sender
+                            .lock()
+                            .await
+                            .send(Message::Text(
+                                format!(
+                                    "{}",
+                                    serde_json::to_string(&ws_data).unwrap_or(String::from("{}"))
+                                )
+                                .into(),
+                            ))
+                            .await
+                            .is_err()
+                        {
+                            error!("Error sending message in send task.");
+                        }
                     }
-                    MessageAction::NewUserEntry => {
-
-                    }
+                    MessageAction::NewUserEntry => {}
                 };
             }
             //if sender
@@ -158,10 +177,7 @@ async fn process_message(
             // this broadcasts the message to all connected clients
             app_state
                 .clients
-                .broadcast(Message::Text(format!(
-                    "{}",
-                    t
-                )))
+                .broadcast(Message::Text(format!("{}", t)))
                 .await;
 
             // this sends the message as an echo only to the sender

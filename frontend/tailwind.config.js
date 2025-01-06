@@ -9,6 +9,7 @@ export default {
   	extend: {
         width: {
             "inside-full": "1400px",
+            "inside-full-lite": "1280px",
         },
   		borderRadius: {
   			lg: 'var(--radius)',

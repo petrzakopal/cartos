@@ -119,7 +119,7 @@ pub fn read_serial_number(
         }
         Err(err) => {
             error!("Failed to connect to card: {:?}", err);
-            serial_number_formatted_string = String::from("erro reading serial number");
+            serial_number_formatted_string = String::from("error reading serial number");
             // Optionally add a delay before retrying to avoid busy looping
             let _ = sleep(Duration::from_millis(100));
         }
